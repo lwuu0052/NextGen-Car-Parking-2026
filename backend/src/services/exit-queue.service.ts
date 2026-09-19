@@ -7,13 +7,17 @@ import { sessionService } from './session.service.js';
 interface ExitQueueItem {
   carPlate: string;
   enqueuedAt: number;
+  attempts: number;
 }
+
+type ExitProcessResult = 'released' | 'retry';
 
 export class ExitQueueService {
   private readonly queue: ExitQueueItem[] = [];
   private readonly queuedPlates = new Set<string>();
   private processing = false;
-  private readonly releaseGapMs = 600;
+  private readonly releaseGapMs = 1500;
+  private readonly retryDelayMs = 800;
   private readonly exitSpotName = 'EXIT_EXIT';
 
   public enqueue(carPlate: string): void {
@@ -21,7 +25,7 @@ export class ExitQueueService {
       return;
     }
 
-    this.queue.push({ carPlate, enqueuedAt: Date.now() });
+    this.queue.push({ carPlate, enqueuedAt: Date.now(), attempts: 0 });
     this.queuedPlates.add(carPlate);
     console.log(`[Exit Queue] Enqueued "${carPlate}". Queue length: ${this.queue.length}.`);
     void this.processQueue();
@@ -36,11 +40,18 @@ export class ExitQueueService {
     try {
       while (this.queue.length > 0) {
         const item = this.queue[0];
-        const released = await this.processOne(item.carPlate);
+        item.attempts += 1;
+
+        const result = await this.processOne(item);
+        if (result === 'retry') {
+          await new Promise((resolve) => setTimeout(resolve, this.retryDelayMs));
+          continue;
+        }
+
         this.queue.shift();
         this.queuedPlates.delete(item.carPlate);
 
-        if (released && this.queue.length > 0) {
+        if (result === 'released' && this.queue.length > 0) {
           await new Promise((resolve) => setTimeout(resolve, this.releaseGapMs));
         }
       }
@@ -49,26 +60,35 @@ export class ExitQueueService {
     }
   }
 
-  private async processOne(carPlate: string): Promise<boolean> {
+  private async processOne(item: ExitQueueItem): Promise<ExitProcessResult> {
+    const carPlate = item.carPlate;
     console.log(`[Exit Queue] Processing "${carPlate}" at front of queue.`);
 
     const activeSession = await sessionRepository.findActiveSessionByPlate(carPlate).catch(() => null);
     if (!activeSession) {
-      console.warn(`[Exit Queue] No active session found for "${carPlate}". Skipping.`);
-      return false;
+      console.warn(`[Exit Queue] No active session found for "${carPlate}". Releasing in FIFO order to clear exit.`);
+      return this.releaseVehicle(carPlate);
     }
 
     if (!['ready_to_exit', 'awaiting_payment'].includes(activeSession.status)) {
-      console.log(`[Exit Queue] "${carPlate}" status is "${activeSession.status}", not ready for exit.`);
-      return false;
+      console.log(
+        `[Exit Queue] "${carPlate}" reached exit with status "${activeSession.status}". Marking ready for payment.`
+      );
+      await sessionService.markUnparked(carPlate);
     }
 
     const exitCountBefore = await this.getExitDetectedCars();
     const paid = await this.ensurePaid(carPlate, activeSession);
     if (!paid) {
-      console.warn(`[Exit Queue] Payment clearance failed for "${carPlate}". Keeping car at exit.`);
-      return false;
+      console.warn(`[Exit Queue] Payment clearance failed for "${carPlate}". Will retry while it remains queue head.`);
+      return 'retry';
     }
+
+    return this.releaseVehicle(carPlate, exitCountBefore);
+  }
+
+  private async releaseVehicle(carPlate: string, exitCountBefore?: number | null): Promise<ExitProcessResult> {
+    const initialCount = exitCountBefore ?? (await this.getExitDetectedCars());
 
     await simulatorClient.openGate('gateB').catch(() => {});
     const opened = await simulatorClient.waitForGateState('gateB', 'Open', 3000);
@@ -83,12 +103,12 @@ export class ExitQueueService {
       setTimeout(async () => {
         await simulatorClient.sendCarToSpot(carPlate, 'leavepark').catch(() => {});
       }, 1000);
-      await this.waitForExitSpotProgress(exitCountBefore);
+      await this.waitForExitSpotProgress(initialCount);
       await sessionService.markDeparted(carPlate);
-      return true;
+      return 'released';
     }
 
-    return false;
+    return 'retry';
   }
 
   private async ensurePaid(carPlate: string, session: ParkingSessionRecord): Promise<boolean> {
@@ -142,8 +162,27 @@ export class ExitQueueService {
       return null;
     }
 
-    const detectedCars = exitSpot.detectedCars ?? exitSpot.DetectedCars;
-    return typeof detectedCars === 'number' ? detectedCars : null;
+    const detectedCars =
+      exitSpot.detectedCars ??
+      exitSpot.DetectedCars ??
+      exitSpot.carCount ??
+      exitSpot.CarCount ??
+      exitSpot.CarsDetected;
+
+    if (typeof detectedCars === 'number') {
+      return detectedCars;
+    }
+
+    const occupancyStatus = (exitSpot.OccupancyStatus || exitSpot.occupancy_status || '').toLowerCase();
+    if (occupancyStatus === 'occupied' || occupancyStatus === 'reserved') {
+      return 1;
+    }
+
+    if (occupancyStatus === 'free') {
+      return 0;
+    }
+
+    return null;
   }
 
   private async waitForExitSpotProgress(initialCount: number | null): Promise<void> {

@@ -95,7 +95,7 @@ export class BillingService {
     event: PaymentMadeEventPayload,
     options: PaymentProcessingOptions = {}
   ): Promise<PaymentProcessingResult> {
-    const dispatchOnSuccess = options.dispatchOnSuccess ?? true;
+    const dispatchOnSuccess = options.dispatchOnSuccess ?? false;
     const carPlate = event.CarPlateNumber || (event as any).PlateNumber || (event as any).CarPlate;
     const reportedAmount = Number(event.Amount) || 0;
     const externalPaymentId = event.EventId || (event as any).PaymentId || null;
