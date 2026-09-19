@@ -5,7 +5,7 @@ import { config } from '../../config/index.js';
 
 export async function handleCarSpotAction(event: CarSpotActionEventPayload): Promise<void> {
   console.log(
-    `[Webhook Handler] CarSpotAction: Car ${event.CarPlateNumber || 'unknown'} (${event.CarType || 'Normal'}) ${event.Direction || 'CarIn'} at Spot ${event.SpotName || 'ENTRY1'}`
+    `[Webhook Handler] CarSpotAction: Car "${event.CarPlateNumber || 'unknown'}" (${event.CarType || 'Normal'}) ${event.Direction || 'CarIn'} at Spot ${event.SpotName || 'ENTRY1'}`
   );
 
   // Update spot status in DB if DB is available
@@ -19,7 +19,7 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
     }
   }
 
-  // Automatic gate opening logic when car arrives at entrance
+  // Automatic gate opening and spot allocation logic when car arrives at entrance
   if (config.AUTO_OPEN_GATE_ON_ARRIVAL) {
     const isCarIn = event.Direction === 'CarIn';
     const isEntry =
@@ -28,29 +28,56 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
       (event.SpotName && event.SpotName.toLowerCase().includes('entry'));
 
     if (isEntry) {
+      const carPlate = event.CarPlateNumber;
       console.log(
-        `[Auto Gate Control] Vehicle ${event.CarPlateNumber || 'car'} arrived at entrance (${event.SpotName}). Opening gate...`
+        `[Auto Gate Control] Vehicle "${carPlate || 'car'}" arrived at entrance (${event.SpotName}). Triggering gate open & spot allocation...`
       );
 
-      // Attempt to open gateA directly
+      // 1. Open the entrance gate
       try {
-        const resultA = await simulatorClient.openGate('gateA');
-        console.log(`[Auto Gate Control] gateA open result:`, resultA);
+        await simulatorClient.openGate('gateA');
       } catch (err: any) {
         console.error(`[Auto Gate Control] Error opening gateA:`, err.message);
       }
 
-      // Also attempt to query all barriers and open any closed gate
+      // Also ensure any closed gate gets opened
       try {
         const barriers = await simulatorClient.listBarriers();
         for (const b of barriers) {
           if (b.State === 'Closed' || b.State === 'Closing') {
-            console.log(`[Auto Gate Control] Opening closed gate ${b.Name}...`);
             await simulatorClient.openGate(b.Name);
           }
         }
-      } catch (err: any) {
+      } catch {
         // Ignored fallback
+      }
+
+      // 2. Assign free parking spot to the car so it drives in!
+      if (carPlate) {
+        try {
+          const spots = await simulatorClient.listParkingSpots();
+          // Find first available spot that is not occupied and not an entry/exit spot
+          const freeSpot = spots.find(
+            (s) =>
+              s.Name &&
+              !s.Name.toLowerCase().includes('entry') &&
+              !s.Name.toLowerCase().includes('exit') &&
+              s.OccupancyStatus !== 'Occupied' &&
+              !s.IsRepairRequested
+          );
+
+          if (freeSpot) {
+            console.log(
+              `[Auto Parking Allocation] Directing car "${carPlate}" to free spot "${freeSpot.Name}"...`
+            );
+            const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, freeSpot.Name);
+            console.log(`[Auto Parking Allocation] Dispatch result:`, dispatchResult);
+          } else {
+            console.warn(`[Auto Parking Allocation] No free parking spot available for car "${carPlate}".`);
+          }
+        } catch (err: any) {
+          console.error(`[Auto Parking Allocation] Failed to assign spot to car:`, err.message);
+        }
       }
     }
   }
