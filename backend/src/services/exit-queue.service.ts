@@ -62,7 +62,7 @@ export class ExitQueueService {
 
   private async processOne(item: ExitQueueItem): Promise<ExitProcessResult> {
     const carPlate = item.carPlate;
-    console.log(`[Exit Queue] Processing "${carPlate}" at front of queue.`);
+    console.log(`[Exit Queue] Processing "${carPlate}" at front of FIFO queue.`);
 
     const activeSession = await sessionRepository.findActiveSessionByPlate(carPlate).catch(() => null);
     if (!activeSession) {
@@ -77,14 +77,44 @@ export class ExitQueueService {
       await sessionService.markUnparked(carPlate);
     }
 
-    const exitCountBefore = await this.getExitDetectedCars();
-    const paid = await this.ensurePaid(carPlate, activeSession);
-    if (!paid) {
-      console.warn(`[Exit Queue] Payment clearance failed for "${carPlate}". Will retry while it remains queue head.`);
-      return 'retry';
+    // Check if already paid
+    let existingInvoice = await invoiceRepository.findInvoiceByPlateNumber(carPlate).catch(() => null);
+    if (existingInvoice?.status === 'paid') {
+      console.log(`[Exit Queue] Car "${carPlate}" already paid. Releasing vehicle.`);
+      return this.releaseVehicle(carPlate);
     }
 
-    return this.releaseVehicle(carPlate, exitCountBefore);
+    // Generate charge and issue simulator charge request
+    const charge = await billingService.generateSimulatorChargeInvoice(activeSession);
+    const chargeResult = await simulatorClient.chargeCar(carPlate, charge.parkingCost, charge.chargingCost);
+    console.log(`[Exit Queue] Charge requested for "${carPlate}" (total: ${charge.totalCost}):`, chargeResult);
+
+    // Wait up to 15 seconds for driver / simulator to complete payment via real payment_made webhook
+    const paymentTimeoutMs = 15_000;
+    const startTime = Date.now();
+    let isPaid = false;
+
+    console.log(`[Exit Queue] Waiting up to 15s for "${carPlate}" to complete payment...`);
+    while (Date.now() - startTime < paymentTimeoutMs) {
+      existingInvoice = await invoiceRepository.findInvoiceByPlateNumber(carPlate).catch(() => null);
+      if (existingInvoice?.status === 'paid') {
+        isPaid = true;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    if (isPaid) {
+      console.log(`[Exit Queue] Payment SUCCESS for "${carPlate}" within 15s. Opening gateB and releasing.`);
+      return this.releaseVehicle(carPlate);
+    } else {
+      console.warn(
+        `[Exit Queue] Payment FAILED / TIMED OUT (15s elapsed) for "${carPlate}". Keeping gateB CLOSED. Vehicle remains stopped.`
+      );
+      // Ensure gateB is explicitly kept closed so unpaid / fraud cars cannot exit!
+      await simulatorClient.closeGate('gateB').catch(() => {});
+      return 'retry';
+    }
   }
 
   private async releaseVehicle(carPlate: string, exitCountBefore?: number | null): Promise<ExitProcessResult> {
@@ -96,58 +126,24 @@ export class ExitQueueService {
       console.warn(`[Exit Queue] gateB did not report Open before dispatching "${carPlate}".`);
     }
 
-    const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'leavepark');
+    const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1');
     console.log(`[Exit Queue] Dispatch result for "${carPlate}":`, dispatchResult);
 
     if (dispatchResult.success) {
       setTimeout(async () => {
-        await simulatorClient.sendCarToSpot(carPlate, 'leavepark').catch(() => {});
+        await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1').catch(() => {});
       }, 1000);
       await this.waitForExitSpotProgress(initialCount);
       await sessionService.markDeparted(carPlate);
+      
+      // Auto-close gateB after car has passed through
+      setTimeout(() => {
+        simulatorClient.closeGate('gateB').catch(() => {});
+      }, 1500);
       return 'released';
     }
 
     return 'retry';
-  }
-
-  private async ensurePaid(carPlate: string, session: ParkingSessionRecord): Promise<boolean> {
-    const existingInvoice = await invoiceRepository.findInvoiceByPlateNumber(carPlate).catch(() => null);
-    if (existingInvoice?.status === 'paid') {
-      return true;
-    }
-
-    if (session.status === 'awaiting_payment') {
-      const result = await billingService.processPaymentEvent(
-        {
-          EventClass: 'payment_made',
-          CarPlateNumber: carPlate,
-          Amount: Number.MAX_SAFE_INTEGER,
-          EventId: `exit_queue_clear_${Date.now()}_${carPlate.replace(/\s+/g, '')}`,
-        },
-        { dispatchOnSuccess: false }
-      );
-      return result.success;
-    }
-
-    const charge = await billingService.generateSimulatorChargeInvoice(session);
-    const chargeResult = await simulatorClient.chargeCar(carPlate, charge.parkingCost, charge.chargingCost);
-    console.log(`[Exit Queue] Charge result for "${carPlate}":`, chargeResult);
-    if (!chargeResult.success) {
-      return false;
-    }
-
-    const paymentResult = await billingService.processPaymentEvent(
-      {
-        EventClass: 'payment_made',
-        CarPlateNumber: carPlate,
-        Amount: charge.totalCost,
-        EventId: `exit_queue_pay_${Date.now()}_${carPlate.replace(/\s+/g, '')}`,
-      },
-      { dispatchOnSuccess: false }
-    );
-
-    return paymentResult.success;
   }
 
   private async getExitDetectedCars(): Promise<number | null> {

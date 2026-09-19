@@ -34,6 +34,12 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
       paymentAttemptRepository.clearAll();
       allocationService.clearAllReservations();
 
+      try {
+        await db.query('TRUNCATE TABLE payment_attempts, invoices, parking_sessions RESTART IDENTITY CASCADE');
+      } catch {
+        // Ignored if DB is offline
+      }
+
       activeSessions = [];
       invoices = [];
       attempts = [];

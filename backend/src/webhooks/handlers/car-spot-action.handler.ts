@@ -122,9 +122,20 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
     return;
   }
 
+  // Handle car passing entrance (moving into facility) -> close entrance gate
+  if (isEntrySpot && isCarOut) {
+    console.log(`[Auto Gate Control] Vehicle "${carPlate || 'car'}" passed entrance spot "${spotName}". Closing gate.`);
+    findNearestEntryGate(spotName).then((gateName) => {
+      simulatorClient.closeGate(gateName).catch(() => {});
+    }).catch(() => {
+      simulatorClient.closeGate('gateA').catch(() => {});
+    });
+  }
+
   // 3. Handle car fully leaving the parking lot
   if (isLeaveSpot && carPlate) {
     console.log(`[Session Lifecycle] Car "${carPlate}" reached leave spot "${spotName}". Marking departed.`);
+    simulatorClient.closeGate('gateB').catch(() => {});
     await sessionService.markDeparted(carPlate);
     return;
   }
@@ -132,6 +143,7 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
   // 4. Handle Car Parked in assigned spot
   if (!isEntrySpot && !isExitSpot && !isLeaveSpot && isCarIn && carPlate) {
     console.log(`[Session Lifecycle] Car "${carPlate}" has parked in spot "${spotName}".`);
+    simulatorClient.closeGate('gateA').catch(() => {});
     allocationService.releaseReservation(spotName);
     await sessionService.markParked(carPlate);
     return;

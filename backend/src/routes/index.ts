@@ -8,6 +8,11 @@ import { syncService } from '../services/sync.service.js';
 
 export const router = Router();
 
+// Root redirect to frontend dashboard
+router.get('/', (req, res) => {
+  res.redirect('/Parking_dashboard.html');
+});
+
 // Health check endpoints
 router.get('/health/live', getLiveHealth);
 router.get('/health/ready', getReadyHealth);
