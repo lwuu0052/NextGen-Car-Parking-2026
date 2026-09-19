@@ -31,6 +31,15 @@ class PostgresDatabase {
     return this.pool;
   }
 
+  public async getClient(): Promise<PoolClient | null> {
+    try {
+      const pool = this.getPool();
+      return await pool.connect();
+    } catch {
+      return null;
+    }
+  }
+
   public async query<R extends QueryResultRow = any>(
     text: string,
     params: any[] = []
