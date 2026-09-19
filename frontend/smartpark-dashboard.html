@@ -25,6 +25,7 @@
   --info-soft:#e9f0fe;
   --muted-spot:#9aa1ae;
   --muted-spot-soft:#eef0f3;
+  --accent-deep:#8a6100;
   --shadow: 0 1px 2px rgba(20,22,30,.04), 0 8px 24px rgba(20,22,30,.05);
 }
 @media (prefers-color-scheme: dark){
@@ -43,6 +44,7 @@
     --danger-soft:#341418;
     --info-soft:#132038;
     --muted-spot-soft:#1e222c;
+    --accent-deep:#e0ad2e;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
   }
 }
@@ -61,6 +63,7 @@
   --danger-soft:#341418;
   --info-soft:#132038;
   --muted-spot-soft:#1e222c;
+  --accent-deep:#e0ad2e;
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
 }
 
@@ -76,8 +79,13 @@ button{font-family:inherit;}
 .sidebar{
   width:240px;flex:0 0 240px;background:linear-gradient(180deg,var(--sidebar-bg),var(--sidebar-bg-2));
   color:var(--sidebar-text);display:flex;flex-direction:column;padding:22px 14px;gap:26px;
-  position:sticky;top:0;height:100vh;
+  position:sticky;top:0;height:100vh;overflow:hidden;
+  transition:width .22s ease,padding .22s ease,opacity .18s ease;
 }
+.app.collapsed .sidebar{width:0;flex-basis:0;padding-left:0;padding-right:0;opacity:0;border-right:none;}
+.sidebar>*{width:212px;}
+.menu-btn{background:var(--surface);border:1px solid var(--border);width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);cursor:pointer;box-shadow:var(--shadow);flex:none;}
+.menu-btn:hover{color:var(--text);}
 .brand{display:flex;align-items:center;gap:10px;padding:0 8px;}
 .brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:var(--accent-ink);font-weight:800;font-size:15px;font-family:'Manrope',sans-serif;flex:none;}
 .brand-name{font-family:'Manrope',sans-serif;font-weight:800;font-size:16.5px;color:#fff;letter-spacing:.2px;}
@@ -116,10 +124,9 @@ button{font-family:inherit;}
 
 /* ---------- Stat tiles ---------- */
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;}
-.stat-top{display:flex;align-items:center;justify-content:space-between;}
-.stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none;}
-.stat-trend{font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;}
+.stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.stat-trend{font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;white-space:nowrap;}
 .stat-trend.up{color:var(--success);background:var(--success-soft);}
 .stat-trend.down{color:var(--danger);background:var(--danger-soft);}
 .stat-label{font-size:12px;color:var(--text-muted);font-weight:600;}
@@ -146,15 +153,16 @@ button{font-family:inherit;}
 /* ---------- Parking layout grid ---------- */
 .zone-title{font-size:11.5px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
 .bay-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
-.bay{position:relative;aspect-ratio:1/0.82;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:700;font-size:12.5px;color:#fff;cursor:default;}
-.bay .ico{opacity:.92;}
-.bay.free{background:var(--success);}
-.bay.occupied{background:var(--danger);}
-.bay.electric{background:var(--info);}
-.bay.accessible{background:var(--accent);color:var(--accent-ink);}
-.bay.maintenance{background:var(--muted-spot);}
-.bay.broken{background:var(--danger);}
-.bay.broken::after{content:"";position:absolute;inset:0;border-radius:10px;border:2px dashed rgba(255,255,255,.7);}
+.bay{position:relative;aspect-ratio:1/0.82;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-weight:700;font-size:12.5px;
+  background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--border);cursor:default;overflow:hidden;}
+.bay .ico{opacity:.95;}
+.bay.free{border-top-color:var(--success);color:var(--success);}
+.bay.occupied{border-top-color:var(--danger);color:var(--danger);background:var(--danger-soft);}
+.bay.electric{border-top-color:var(--info);color:var(--info);}
+.bay.accessible{border-top-color:var(--accent);color:var(--accent-deep);}
+.bay.maintenance{border-top-color:var(--muted-spot);color:var(--text-muted);background:var(--muted-spot-soft);}
+.bay.broken{border-top-color:var(--danger);color:var(--danger);background:var(--danger-soft);}
+.bay.broken::after{content:"";position:absolute;inset:3px 0 0 0;background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(229,72,77,.14) 6px,rgba(229,72,77,.14) 12px);pointer-events:none;}
 .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-muted);font-weight:600;}
 .legend-dot{width:9px;height:9px;border-radius:3px;}
@@ -168,17 +176,24 @@ button{font-family:inherit;}
 .status-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;}
 .status-pill.open{background:var(--success-soft);color:var(--success);}
 .status-pill.closed{background:var(--danger-soft);color:var(--danger);}
-.status-pill.moving{background:var(--accent-soft);color:var(--accent-ink);}
+.status-pill.moving{background:var(--accent-soft);color:var(--accent-ink);animation:gatePulse 1s ease-in-out infinite;}
+.status-pill .livedot{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:middle;}
+.status-pill.open .livedot{animation:gateBlink 2s ease-in-out infinite;}
+@keyframes gatePulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes gateBlink{0%,100%{opacity:.35}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.status-pill.moving{animation:none}.status-pill .livedot{animation:none}}
 .gate-actions{display:flex;gap:8px;}
 .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;font-weight:700;padding:7px 0;border-radius:8px;cursor:pointer;flex:1;transition:filter .1s;}
 .btn:hover{filter:brightness(1.05);}
 .btn.primary{background:var(--text);color:var(--surface);border-color:var(--text);}
 .btn.danger-o{color:var(--danger);border-color:var(--danger-soft);}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none;}
 .cycle-row{display:flex;align-items:center;gap:8px;}
 .cycle-track{flex:1;height:5px;border-radius:999px;background:var(--border);overflow:hidden;}
-.cycle-fill{height:100%;border-radius:999px;background:var(--info);}
+.cycle-fill{height:100%;border-radius:999px;background:var(--info);transition:width .4s ease;}
 .cycle-fill.warn{background:var(--accent);}
-.cycle-label{font-size:10.5px;color:var(--text-faint);font-weight:600;white-space:nowrap;}
+.cycle-label{font-size:10.5px;color:var(--text-faint);font-weight:600;white-space:nowrap;transition:color .2s;}
+.gate-card .last-action{font-size:10.5px;color:var(--text-faint);}
 
 /* ---------- Zone environment ---------- */
 .env-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
@@ -191,10 +206,16 @@ button{font-family:inherit;}
 .co-track{height:6px;border-radius:999px;background:var(--border);overflow:hidden;}
 .co-fill{height:100%;border-radius:999px;}
 .env-toggles{display:flex;gap:8px;}
-.toggle-chip{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700;padding:6px 0;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-faint);cursor:pointer;}
+.toggle-chip{flex:1;position:relative;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700;padding:6px 0;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-faint);cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
 .toggle-chip.on{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-soft);}
-.toggle-chip .dotlive{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;}
-.toggle-chip.on .dotlive{opacity:1;}
+.toggle-chip .dotlive{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;transition:opacity .15s;}
+.toggle-chip.on .dotlive{opacity:1;animation:gateBlink 2s ease-in-out infinite;}
+.toggle-chip .auto-tag{font-size:8px;letter-spacing:.05em;text-transform:uppercase;opacity:.65;font-weight:800;}
+.night-toggle{display:flex;align-items:center;gap:8px;background:var(--surface-alt);border:1px solid var(--border);border-radius:999px;padding:4px 4px 4px 12px;font-size:11.5px;font-weight:700;color:var(--text-muted);}
+.night-switch{width:34px;height:19px;border-radius:999px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;flex:none;}
+.night-switch::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--surface);transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.night-switch.on{background:var(--accent);}
+.night-switch.on::after{left:17px;}
 
 /* ---------- Charts ---------- */
 .chart-row{display:flex;gap:20px;align-items:center;}
@@ -248,8 +269,7 @@ tr:last-child td{border-bottom:none;}
   .env-grid{grid-template-columns:1fr 1fr;}
 }
 @media (max-width:760px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .2s;z-index:20;}
-  .sidebar.open{transform:translateX(0);}
+  .app:not(.collapsed) .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;width:212px;flex-basis:212px;padding:22px 14px;opacity:1;box-shadow:var(--shadow);}
   .stats{grid-template-columns:1fr 1fr;}
   .bay-grid{grid-template-columns:repeat(3,1fr);}
   .env-grid{grid-template-columns:1fr;}
@@ -258,7 +278,7 @@ tr:last-child td{border-bottom:none;}
 }
 </style>
 
-<div class="app">
+<div class="app" id="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="brand-mark">SP</div>
@@ -292,6 +312,7 @@ tr:last-child td{border-bottom:none;}
 
   <div class="main">
     <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Toggle sidebar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <div>
         <h1>Dashboard</h1>
         <div class="crumb">Facility overview · updated just now</div>
@@ -311,43 +332,23 @@ tr:last-child td{border-bottom:none;}
       <!-- Stat tiles -->
       <section class="stats">
         <div class="stat-card">
-          <div class="stat-top">
-            <div class="stat-icon" style="background:var(--info-soft);color:var(--info)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l2-5h10l2 5"/><rect x="3" y="12" width="18" height="6" rx="1.5"/><circle cx="7.5" cy="18" r="1.3"/><circle cx="16.5" cy="18" r="1.3"/></svg></div>
-            <span class="stat-trend up">+4</span>
-          </div>
-          <div class="stat-label">Cars inside</div>
+          <div class="stat-top"><span class="stat-label">Cars inside</span><span class="stat-trend up">+4</span></div>
           <div class="stat-value">16<small>&nbsp;vehicles</small></div>
         </div>
         <div class="stat-card">
-          <div class="stat-top">
-            <div class="stat-icon" style="background:var(--success-soft);color:var(--success)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg></div>
-            <span class="stat-trend up">68%</span>
-          </div>
-          <div class="stat-label">Free spots</div>
+          <div class="stat-top"><span class="stat-label">Free spots</span><span class="stat-trend up">68%</span></div>
           <div class="stat-value">34<small>&nbsp;/ 50</small></div>
         </div>
         <div class="stat-card">
-          <div class="stat-top">
-            <div class="stat-icon" style="background:var(--danger-soft);color:var(--danger)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></svg></div>
-            <span class="stat-trend down">32%</span>
-          </div>
-          <div class="stat-label">Occupied spots</div>
+          <div class="stat-top"><span class="stat-label">Occupied spots</span><span class="stat-trend down">32%</span></div>
           <div class="stat-value">16<small>&nbsp;/ 50</small></div>
         </div>
         <div class="stat-card">
-          <div class="stat-top">
-            <div class="stat-icon" style="background:var(--accent-soft);color:var(--accent-ink)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg></div>
-            <span class="stat-trend up">+$86</span>
-          </div>
-          <div class="stat-label">Revenue today</div>
+          <div class="stat-top"><span class="stat-label">Revenue today</span><span class="stat-trend up">+$86</span></div>
           <div class="stat-value">$642</div>
         </div>
         <div class="stat-card">
-          <div class="stat-top">
-            <div class="stat-icon" style="background:var(--danger-soft);color:var(--danger)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a1.8 1.8 0 0 0 1.5 2.7h17.4a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z"/></svg></div>
-            <span class="stat-trend down">2 open</span>
-          </div>
-          <div class="stat-label">Active alerts</div>
+          <div class="stat-top"><span class="stat-label">Active alerts</span><span class="stat-trend down">2 open</span></div>
           <div class="stat-value">2</div>
         </div>
       </section>
@@ -381,12 +382,12 @@ tr:last-child td{border-bottom:none;}
         </div>
 
         <div class="panel">
-          <div class="panel-head"><h2>Gate status</h2></div>
+          <div class="panel-head"><h2>Gate status</h2><div class="hint">Live — reflects open/close travel time</div></div>
           <div class="panel-body">
-            <div class="gate-card">
+            <div class="gate-card" id="entryCard">
               <div class="gate-card-top">
                 <div class="gate-name"><span class="gdot" style="background:var(--danger)"></span>Entry gate</div>
-                <span class="status-pill closed" id="entryPill">Closed</span>
+                <span class="status-pill closed" id="entryPill"><span class="livedot"></span>Closed</span>
               </div>
               <div class="gate-actions">
                 <button class="btn primary" onclick="toggleGate('entry','open')">Open</button>
@@ -396,11 +397,12 @@ tr:last-child td{border-bottom:none;}
                 <div class="cycle-track"><div class="cycle-fill" style="width:41%"></div></div>
                 <span class="cycle-label">205/500 cycles</span>
               </div>
+              <div class="last-action" id="entryLast">Last action: closed, 3m ago</div>
             </div>
-            <div class="gate-card">
+            <div class="gate-card" id="exitCard">
               <div class="gate-card-top">
                 <div class="gate-name"><span class="gdot" style="background:var(--success)"></span>Exit gate</div>
-                <span class="status-pill open" id="exitPill">Open</span>
+                <span class="status-pill open" id="exitPill"><span class="livedot"></span>Open</span>
               </div>
               <div class="gate-actions">
                 <button class="btn" onclick="toggleGate('exit','open')">Open</button>
@@ -410,6 +412,7 @@ tr:last-child td{border-bottom:none;}
                 <div class="cycle-track"><div class="cycle-fill warn" style="width:87%"></div></div>
                 <span class="cycle-label">437/500 cycles</span>
               </div>
+              <div class="last-action" id="exitLast">Last action: opened, 1m ago</div>
             </div>
           </div>
         </div>
@@ -420,36 +423,13 @@ tr:last-child td{border-bottom:none;}
         <div class="panel-head">
           <div>
             <h2>Zone environment</h2>
-            <div class="hint">Carbon monoxide, exhaust fans &amp; lighting per zone</div>
+            <div class="hint">Carbon monoxide is live · fans auto-run above 50ppm · lights auto-run at night</div>
           </div>
+          <div class="panel-head-spacer"></div>
+          <div class="night-toggle">Night mode<div class="night-switch" id="nightSwitch" onclick="toggleNight()"></div></div>
         </div>
         <div class="panel-body">
-          <div class="env-grid">
-            <div class="env-card">
-              <div class="env-top"><span class="env-zone">Zone 1</span><span class="co-badge co-ok">38 ppm</span></div>
-              <div class="co-track"><div class="co-fill" style="width:38%;background:var(--success)"></div></div>
-              <div class="env-toggles">
-                <div class="toggle-chip" id="fan-0" onclick="toggleChip('fan-0')"><span class="dotlive"></span>Fan</div>
-                <div class="toggle-chip" id="light-0" onclick="toggleChip('light-0')"><span class="dotlive"></span>Lights</div>
-              </div>
-            </div>
-            <div class="env-card">
-              <div class="env-top"><span class="env-zone">Zone 2</span><span class="co-badge co-warn">64 ppm</span></div>
-              <div class="co-track"><div class="co-fill" style="width:64%;background:var(--danger)"></div></div>
-              <div class="env-toggles">
-                <div class="toggle-chip on" id="fan-1" onclick="toggleChip('fan-1')"><span class="dotlive"></span>Fan</div>
-                <div class="toggle-chip on" id="light-1" onclick="toggleChip('light-1')"><span class="dotlive"></span>Lights</div>
-              </div>
-            </div>
-            <div class="env-card">
-              <div class="env-top"><span class="env-zone">Zone 3</span><span class="co-badge co-ok">21 ppm</span></div>
-              <div class="co-track"><div class="co-fill" style="width:21%;background:var(--success)"></div></div>
-              <div class="env-toggles">
-                <div class="toggle-chip" id="fan-2" onclick="toggleChip('fan-2')"><span class="dotlive"></span>Fan</div>
-                <div class="toggle-chip on" id="light-2" onclick="toggleChip('light-2')"><span class="dotlive"></span>Lights</div>
-              </div>
-            </div>
-          </div>
+          <div class="env-grid" id="envGrid"></div>
         </div>
       </section>
 
@@ -578,12 +558,99 @@ document.getElementById('zoneTabs').addEventListener('click', e=>{
 });
 renderZone(0);
 
-function toggleGate(which, action){
+/* ---------- Sidebar collapse ---------- */
+const appEl = document.getElementById('app');
+document.getElementById('menuBtn').addEventListener('click', ()=>{
+  appEl.classList.toggle('collapsed');
+});
+if(window.innerWidth <= 760) appEl.classList.add('collapsed');
+
+/* ---------- Gates: dynamic open/close with travel time ---------- */
+const gate = {
+  entry: { state:'closed', cycles:205, busy:false },
+  exit:  { state:'open',   cycles:437, busy:false },
+};
+const CYCLE_MAX = 500;
+const pillMarkup = { open:'Open', closed:'Closed', opening:'Opening…', closing:'Closing…' };
+
+function paintGate(which){
+  const g = gate[which];
   const pill = document.getElementById(which+'Pill');
-  pill.textContent = action === 'open' ? 'Open' : 'Closed';
-  pill.className = 'status-pill ' + (action === 'open' ? 'open' : 'closed');
+  const label = pillMarkup[g.state];
+  pill.innerHTML = '<span class="livedot"></span>' + label;
+  pill.className = 'status-pill ' + (g.state === 'opening' || g.state === 'closing' ? 'moving' : g.state);
+  const card = document.getElementById(which+'Card');
+  card.querySelectorAll('.btn').forEach(b => b.disabled = g.busy);
+  const pct = Math.round(g.cycles / CYCLE_MAX * 100);
+  card.querySelector('.cycle-fill').style.width = pct + '%';
+  card.querySelector('.cycle-fill').classList.toggle('warn', pct >= 80);
+  card.querySelector('.cycle-label').textContent = g.cycles + '/' + CYCLE_MAX + ' cycles';
 }
-function toggleChip(id){
-  document.getElementById(id).classList.toggle('on');
+function toggleGate(which, action){
+  const g = gate[which];
+  if(g.busy || g.state === action) return;
+  g.busy = true;
+  g.state = action === 'open' ? 'opening' : 'closing';
+  paintGate(which);
+  setTimeout(()=>{
+    g.state = action;
+    g.busy = false;
+    g.cycles = Math.min(CYCLE_MAX, g.cycles + 1);
+    paintGate(which);
+    document.getElementById(which+'Last').textContent = 'Last action: ' + (action === 'open' ? 'opened' : 'closed') + ', just now';
+  }, 1200);
 }
+paintGate('entry');
+paintGate('exit');
+
+/* ---------- Zone environment: live CO, auto fan/light rules ---------- */
+let isNight = false;
+const CO_FAN_THRESHOLD = 50;
+const envZones = [
+  { name:'Zone 1', co:38, fanMode:'auto', lightMode:'auto' },
+  { name:'Zone 2', co:64, fanMode:'auto', lightMode:'auto' },
+  { name:'Zone 3', co:21, fanMode:'auto', lightMode:'auto' },
+];
+function effectiveOn(mode, autoValue){
+  if(mode === 'auto') return autoValue;
+  return mode === 'on';
+}
+function cycleMode(mode){
+  return mode === 'auto' ? 'on' : mode === 'on' ? 'off' : 'auto';
+}
+function renderEnv(){
+  const grid = document.getElementById('envGrid');
+  grid.innerHTML = envZones.map((z,i)=>{
+    const warn = z.co >= CO_FAN_THRESHOLD;
+    const fanOn = effectiveOn(z.fanMode, warn);
+    const lightOn = effectiveOn(z.lightMode, isNight);
+    return `<div class="env-card">
+      <div class="env-top"><span class="env-zone">${z.name}</span><span class="co-badge ${warn?'co-warn':'co-ok'}">${z.co} ppm</span></div>
+      <div class="co-track"><div class="co-fill" style="width:${Math.min(z.co,100)}%;background:${warn?'var(--danger)':'var(--success)'}"></div></div>
+      <div class="env-toggles">
+        <div class="toggle-chip ${fanOn?'on':''}" onclick="cycleEnv(${i},'fan')"><span class="dotlive"></span>Fan${z.fanMode==='auto'?'<span class="auto-tag">auto</span>':''}</div>
+        <div class="toggle-chip ${lightOn?'on':''}" onclick="cycleEnv(${i},'light')"><span class="dotlive"></span>Lights${z.lightMode==='auto'?'<span class="auto-tag">auto</span>':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function cycleEnv(i, which){
+  const z = envZones[i];
+  if(which === 'fan') z.fanMode = cycleMode(z.fanMode);
+  else z.lightMode = cycleMode(z.lightMode);
+  renderEnv();
+}
+function toggleNight(){
+  isNight = !isNight;
+  document.getElementById('nightSwitch').classList.toggle('on', isNight);
+  renderEnv();
+}
+renderEnv();
+setInterval(()=>{
+  envZones.forEach(z=>{
+    const drift = Math.round((Math.random()-0.45) * 9);
+    z.co = Math.max(6, Math.min(96, z.co + drift));
+  });
+  renderEnv();
+}, 3500);
 </script>
