@@ -149,6 +149,27 @@ export class SessionRepository {
     }
   }
 
+  public async updateParkingSpot(id: number, parkingSpotId: number | null): Promise<ParkingSessionRecord | null> {
+    try {
+      const res = await db.query<ParkingSessionRecord>(
+        `UPDATE parking_sessions
+         SET parking_spot_id = $1
+         WHERE id = $2
+         RETURNING *`,
+        [parkingSpotId, id]
+      );
+      const record = res.rows[0];
+      if (record) memorySessions.set(record.id, record);
+      return record || null;
+    } catch {
+      const session = memorySessions.get(id);
+      if (session) {
+        session.parking_spot_id = parkingSpotId;
+      }
+      return session || null;
+    }
+  }
+
   public async findAllActiveSessions(): Promise<ParkingSessionRecord[]> {
     try {
       const res = await db.query<ParkingSessionRecord>(

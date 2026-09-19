@@ -82,6 +82,21 @@ export class SessionService {
       return null;
     }
   }
+
+  public async updateAssignedSpot(
+    plateNumber: string,
+    spotSimulatorName: string
+  ): Promise<ParkingSessionRecord | null> {
+    try {
+      const active = await sessionRepository.findActiveSessionByPlate(plateNumber).catch(() => null);
+      if (!active) return null;
+
+      const spotRecord = await parkingSpotRepository.findBySimulatorName(spotSimulatorName).catch(() => null);
+      return await sessionRepository.updateParkingSpot(active.id, spotRecord?.id ?? null).catch(() => active);
+    } catch {
+      return null;
+    }
+  }
 }
 
 export const sessionService = new SessionService();
