@@ -3,7 +3,7 @@ import { getLiveHealth, getReadyHealth } from '../controllers/health.controller.
 import { getParkingSpots, getDevices, postDeviceCommand } from '../controllers/parking.controller.js';
 import { handleSimulatorWebhook } from '../controllers/webhook.controller.js';
 import { recommendSpot, getActiveSessions } from '../controllers/allocation.controller.js';
-import { getDashboardStats, listInvoices, simulatePayment } from '../controllers/dashboard.controller.js';
+import { getDashboardStats, listInvoices, simulatePayment, resetSystemState } from '../controllers/dashboard.controller.js';
 import { syncService } from '../services/sync.service.js';
 
 export const router = Router();
@@ -25,6 +25,7 @@ router.get('/api/sessions/active', getActiveSessions);
 router.get('/api/dashboard/stats', getDashboardStats);
 router.get('/api/invoices', listInvoices);
 router.post('/api/payments/simulate', simulatePayment);
+router.post('/api/system/reset', resetSystemState);
 
 
 // Base data sync endpoint

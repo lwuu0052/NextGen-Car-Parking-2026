@@ -332,24 +332,24 @@ tr:last-child td{border-bottom:none;}
       <!-- Stat tiles -->
       <section class="stats">
         <div class="stat-card">
-          <div class="stat-top"><span class="stat-label">Cars inside</span><span class="stat-trend up">+4</span></div>
-          <div class="stat-value">16<small>&nbsp;vehicles</small></div>
+          <div class="stat-top"><span class="stat-label">Cars inside</span></div>
+          <div class="stat-value">0<small>&nbsp;vehicles</small></div>
         </div>
         <div class="stat-card">
-          <div class="stat-top"><span class="stat-label">Free spots</span><span class="stat-trend up">68%</span></div>
-          <div class="stat-value">34<small>&nbsp;/ 50</small></div>
+          <div class="stat-top"><span class="stat-label">Free spots</span></div>
+          <div class="stat-value">0<small>&nbsp;/ 30</small></div>
         </div>
         <div class="stat-card">
-          <div class="stat-top"><span class="stat-label">Occupied spots</span><span class="stat-trend down">32%</span></div>
-          <div class="stat-value">16<small>&nbsp;/ 50</small></div>
+          <div class="stat-top"><span class="stat-label">Occupied spots</span></div>
+          <div class="stat-value">0<small>&nbsp;/ 30</small></div>
         </div>
         <div class="stat-card">
-          <div class="stat-top"><span class="stat-label">Revenue today</span><span class="stat-trend up">+$86</span></div>
-          <div class="stat-value">$642</div>
+          <div class="stat-top"><span class="stat-label">Revenue today</span></div>
+          <div class="stat-value">$0.00</div>
         </div>
         <div class="stat-card">
-          <div class="stat-top"><span class="stat-label">Active alerts</span><span class="stat-trend down">2 open</span></div>
-          <div class="stat-value">2</div>
+          <div class="stat-top"><span class="stat-label">Payment Attempts</span></div>
+          <div class="stat-value">0</div>
         </div>
       </section>
 
@@ -480,44 +480,26 @@ tr:last-child td{border-bottom:none;}
       <!-- Row D: activity + alerts -->
       <section class="row-c">
         <div class="panel">
-          <div class="panel-head"><h2>Recent car activity</h2><button class="link-btn">View all</button></div>
+          <div class="panel-head"><h2>Recent car activity &amp; Payments</h2><button class="link-btn" onclick="fetchLiveData()">Refresh live</button></div>
           <div class="panel-body" style="padding-top:6px">
             <table>
-              <thead><tr><th>Time</th><th>Plate</th><th>Type</th><th>Event</th><th>Details</th></tr></thead>
-              <tbody>
+              <thead><tr><th>Time</th><th>Plate</th><th>Session / Item</th><th>Payment Status</th><th>Amount / Details</th></tr></thead>
+              <tbody id="activityTbody">
                 <tr><td class="td-muted">10:42</td><td class="mono plate">WBC 101</td><td>Electric</td><td><span class="ev-badge ev-in">Entry</span></td><td class="td-muted">Directed to S105</td></tr>
-                <tr><td class="td-muted">10:37</td><td class="mono plate">KLM 552</td><td>Any</td><td><span class="ev-badge ev-pay">Payment</span></td><td class="td-muted">$8.00 verified</td></tr>
-                <tr><td class="td-muted">10:31</td><td class="mono plate">KLM 552</td><td>Any</td><td><span class="ev-badge ev-out">Exit</span></td><td class="td-muted">Gate opened, 240 min</td></tr>
-                <tr><td class="td-muted">10:19</td><td class="mono plate">RGT 884</td><td>Accessible</td><td><span class="ev-badge ev-in">Entry</span></td><td class="td-muted">Directed to S111</td></tr>
-                <tr><td class="td-muted">10:05</td><td class="mono plate">ZXE 210</td><td>Any</td><td><span class="ev-badge ev-out">Exit</span></td><td class="td-muted">Penalty: overstay</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
         <div class="panel">
-          <div class="panel-head"><h2>Alerts &amp; maintenance</h2></div>
-          <div class="panel-body">
-            <div class="alert-item">
-              <div class="alert-ico crit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a1.8 1.8 0 0 0 1.5 2.7h17.4a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z"/></svg></div>
-              <div class="alert-body"><div class="alert-title">Spot S106 broken</div><div class="alert-sub">Zone 1 · sensor unresponsive, repair queued</div></div>
-              <div class="alert-time">6m ago</div>
-            </div>
-            <div class="alert-item">
-              <div class="alert-ico warn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14.7 6.3a4 4 0 1 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-3 3-2-2 3-3z"/></svg></div>
-              <div class="alert-body"><div class="alert-title">Exit gate nearing service cycle</div><div class="alert-sub">437/500 open-close cycles used</div></div>
-              <div class="alert-time">24m ago</div>
-            </div>
-            <div class="alert-item">
-              <div class="alert-ico ok"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20 6L9 17l-5-5"/></svg></div>
-              <div class="alert-body"><div class="alert-title">Spot S111 repaired</div><div class="alert-sub">Zone 1 · maintenance completed</div></div>
-              <div class="alert-time">1h ago</div>
-            </div>
-            <div class="alert-item">
-              <div class="alert-ico info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg></div>
-              <div class="alert-body"><div class="alert-title">Payment flagged</div><div class="alert-sub">ZXE 210 · signature mismatch, penalty applied</div></div>
-              <div class="alert-time">2h ago</div>
-            </div>
+          <div class="panel-head"><h2>Simulate Payment &amp; Gate Clear (防刷支付模拟)</h2></div>
+          <div class="panel-body" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="font-size:12px; color:var(--text-faint);">Simulate an external payment webhook event for Level 2 verification:</div>
+            <input type="text" id="simPlateInput" placeholder="Car Plate (e.g. ABC 123)" style="padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;" />
+            <input type="number" id="simAmountInput" placeholder="Amount in minor units (e.g. 1000 = $10.00)" style="padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit;" />
+            <button class="btn primary" onclick="submitSimulatePayment()" style="padding:10px; border-radius:8px;">Submit Payment &amp; Clear Gate</button>
+            <button class="btn danger-o" onclick="submitSystemReset()" style="padding:8px; border-radius:8px; font-size:11px;">⚠️ Reset System Data (重置数据归零)</button>
+            <div id="simPayStatus" style="font-size:12px; font-weight:700; min-height:18px;"></div>
           </div>
         </div>
       </section>
@@ -586,12 +568,25 @@ function paintGate(which){
   card.querySelector('.cycle-fill').classList.toggle('warn', pct >= 80);
   card.querySelector('.cycle-label').textContent = g.cycles + '/' + CYCLE_MAX + ' cycles';
 }
-function toggleGate(which, action){
+
+async function toggleGate(which, action){
   const g = gate[which];
   if(g.busy || g.state === action) return;
   g.busy = true;
   g.state = action === 'open' ? 'opening' : 'closing';
   paintGate(which);
+
+  try {
+    const devId = which === 'entry' ? '1' : '2';
+    await fetch(`/api/devices/${devId}/commands`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: action === 'open' ? 'OPEN' : 'CLOSE' }),
+    }).catch(() => {});
+  } catch (err) {
+    console.error('Gate command error:', err);
+  }
+
   setTimeout(()=>{
     g.state = action;
     g.busy = false;
@@ -603,54 +598,144 @@ function toggleGate(which, action){
 paintGate('entry');
 paintGate('exit');
 
-/* ---------- Zone environment: live CO, auto fan/light rules ---------- */
-let isNight = false;
-const CO_FAN_THRESHOLD = 50;
-const envZones = [
-  { name:'Zone 1', co:38, fanMode:'auto', lightMode:'auto' },
-  { name:'Zone 2', co:64, fanMode:'auto', lightMode:'auto' },
-  { name:'Zone 3', co:21, fanMode:'auto', lightMode:'auto' },
-];
-function effectiveOn(mode, autoValue){
-  if(mode === 'auto') return autoValue;
-  return mode === 'on';
+/* ---------- Live Backend REST API Synchronization ---------- */
+async function fetchLiveData() {
+  try {
+    // 1. Stats
+    const statsRes = await fetch('/api/dashboard/stats');
+    if (statsRes.ok) {
+      const { data } = await statsRes.json();
+      const vals = document.querySelectorAll('.stat-value');
+      if (vals.length >= 5) {
+        vals[0].innerHTML = `${data.activeSessionsCount}<small>&nbsp;vehicles</small>`;
+        vals[1].innerHTML = `${data.spots.free}<small>&nbsp;/ ${data.spots.total || 30}</small>`;
+        vals[2].innerHTML = `${data.spots.occupied}<small>&nbsp;/ ${data.spots.total || 30}</small>`;
+        vals[3].innerHTML = `$${(data.totalRevenueMinor / 100).toFixed(2)}`;
+        vals[4].innerHTML = `${data.paymentAttemptsCount}`;
+      }
+    }
+
+    // 2. Real-time Parking Spots Grid
+    const spotsRes = await fetch('/api/parking-spots');
+    if (spotsRes.ok) {
+      const { data: spots } = await spotsRes.json();
+      if (Array.isArray(spots) && spots.length > 0) {
+        const grid = document.getElementById('bayGrid');
+        grid.innerHTML = spots.slice(0, 12).map(s => {
+          let st = 'free';
+          const name = s.simulatorName || s.simulator_name || 'Spot';
+          const occ = s.occupancyStatus || s.occupancy_status;
+          const health = s.healthStatus || s.health_status;
+          const sType = s.spotType || s.spot_type;
+
+          if (health === 'broken') st = 'broken';
+          else if (occ === 'occupied') st = 'occupied';
+          else if (sType === 'electric') st = 'electric';
+          else if (sType === 'accessible') st = 'accessible';
+
+          return `<div class="bay ${st}">${icons[st] || icons.free}<span>${name}</span></div>`;
+        }).join('');
+      }
+    }
+
+    // 3. Recent Activity & Invoices Table
+    const invRes = await fetch('/api/invoices');
+    if (invRes.ok) {
+      const { data } = await invRes.json();
+      const invoices = data.invoices || [];
+      const tbody = document.getElementById('activityTbody');
+      if (tbody) {
+        if (invoices.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="td-muted" style="text-align:center;">No active invoices recorded. System reset.</td></tr>';
+        } else {
+          tbody.innerHTML = invoices.slice(0, 6).map(inv => {
+            const reqTime = inv.requested_at ? new Date(inv.requested_at).toLocaleTimeString() : 'Just now';
+            const plate = inv.attempts?.[0]?.external_payment_id?.split('_')?.[2] || `Session #${inv.parking_session_id}`;
+            const isPaid = inv.status === 'paid';
+            const badgeClass = isPaid ? 'ev-out' : 'ev-pay';
+            const badgeText = isPaid ? 'Paid' : 'Pending';
+
+            return `<tr>
+              <td class="td-muted">${reqTime}</td>
+              <td class="mono plate">${plate}</td>
+              <td>Session #${inv.parking_session_id}</td>
+              <td><span class="ev-badge ${badgeClass}">${badgeText}</span></td>
+              <td class="td-muted">$${(inv.amount_due_minor / 100).toFixed(2)} (${inv.billable_minutes} min)</td>
+            </tr>`;
+          }).join('');
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching live dashboard stats:', err);
+  }
 }
-function cycleMode(mode){
-  return mode === 'auto' ? 'on' : mode === 'on' ? 'off' : 'auto';
+
+async function submitSimulatePayment() {
+  const plateInput = document.getElementById('simPlateInput');
+  const amountInput = document.getElementById('simAmountInput');
+  const statusEl = document.getElementById('simPayStatus');
+
+  const plate = plateInput.value.trim();
+  const amount = Number(amountInput.value) || 1000;
+
+  if (!plate) {
+    statusEl.textContent = '⚠️ Please enter a car plate number.';
+    statusEl.style.color = 'var(--danger)';
+    return;
+  }
+
+  statusEl.textContent = '⏳ Processing payment clearance...';
+  statusEl.style.color = 'var(--accent-ink)';
+
+  try {
+    const res = await fetch('/api/payments/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plateNumber: plate, amount }),
+    });
+    const json = await res.json();
+
+    if (res.ok && json.data?.success) {
+      statusEl.textContent = `✅ Payment verified for "${plate}"! Exit gate cleared.`;
+      statusEl.style.color = 'var(--success)';
+      plateInput.value = '';
+      amountInput.value = '';
+      fetchLiveData();
+    } else {
+      statusEl.textContent = `❌ Rejected: ${json.data?.reason || json.error?.message || 'Underpaid or invalid payment'}`;
+      statusEl.style.color = 'var(--danger)';
+    }
+  } catch (err) {
+    statusEl.textContent = `❌ Error: ${err.message}`;
+    statusEl.style.color = 'var(--danger)';
+  }
 }
-function renderEnv(){
-  const grid = document.getElementById('envGrid');
-  grid.innerHTML = envZones.map((z,i)=>{
-    const warn = z.co >= CO_FAN_THRESHOLD;
-    const fanOn = effectiveOn(z.fanMode, warn);
-    const lightOn = effectiveOn(z.lightMode, isNight);
-    return `<div class="env-card">
-      <div class="env-top"><span class="env-zone">${z.name}</span><span class="co-badge ${warn?'co-warn':'co-ok'}">${z.co} ppm</span></div>
-      <div class="co-track"><div class="co-fill" style="width:${Math.min(z.co,100)}%;background:${warn?'var(--danger)':'var(--success)'}"></div></div>
-      <div class="env-toggles">
-        <div class="toggle-chip ${fanOn?'on':''}" onclick="cycleEnv(${i},'fan')"><span class="dotlive"></span>Fan${z.fanMode==='auto'?'<span class="auto-tag">auto</span>':''}</div>
-        <div class="toggle-chip ${lightOn?'on':''}" onclick="cycleEnv(${i},'light')"><span class="dotlive"></span>Lights${z.lightMode==='auto'?'<span class="auto-tag">auto</span>':''}</div>
-      </div>
-    </div>`;
-  }).join('');
+
+async function submitSystemReset() {
+  if (!confirm('Are you sure you want to reset all active parking sessions, invoices, and system stats?')) return;
+  const statusEl = document.getElementById('simPayStatus');
+  statusEl.textContent = '⏳ Resetting system data...';
+  statusEl.style.color = 'var(--accent-ink)';
+
+  try {
+    const res = await fetch('/api/system/reset', { method: 'POST' });
+    const json = await res.json();
+    if (res.ok && json.data?.success) {
+      statusEl.textContent = '✅ System state reset to 0 successfully!';
+      statusEl.style.color = 'var(--success)';
+      fetchLiveData();
+    } else {
+      statusEl.textContent = '❌ Reset failed';
+      statusEl.style.color = 'var(--danger)';
+    }
+  } catch (err) {
+    statusEl.textContent = `❌ Error: ${err.message}`;
+    statusEl.style.color = 'var(--danger)';
+  }
 }
-function cycleEnv(i, which){
-  const z = envZones[i];
-  if(which === 'fan') z.fanMode = cycleMode(z.fanMode);
-  else z.lightMode = cycleMode(z.lightMode);
-  renderEnv();
-}
-function toggleNight(){
-  isNight = !isNight;
-  document.getElementById('nightSwitch').classList.toggle('on', isNight);
-  renderEnv();
-}
-renderEnv();
-setInterval(()=>{
-  envZones.forEach(z=>{
-    const drift = Math.round((Math.random()-0.45) * 9);
-    z.co = Math.max(6, Math.min(96, z.co + drift));
-  });
-  renderEnv();
-}, 3500);
+
+// Initial fetch & 2s auto refresh
+fetchLiveData();
+setInterval(fetchLiveData, 2000);
 </script>

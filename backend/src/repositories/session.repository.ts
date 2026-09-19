@@ -163,6 +163,10 @@ export class SessionRepository {
       );
     }
   }
+  public clearAll(): void {
+    memorySessions.clear();
+    memorySessionIdCounter = 100;
+  }
 }
 
 export const sessionRepository = new SessionRepository();

@@ -182,6 +182,10 @@ export class InvoiceRepository {
       return Array.from(memoryInvoices.values());
     }
   }
+  public clearAll(): void {
+    memoryInvoices.clear();
+    memoryIdCounter = 1;
+  }
 }
 
 export const invoiceRepository = new InvoiceRepository();
