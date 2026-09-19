@@ -69,6 +69,18 @@ export class PaymentAttemptRepository {
     }
   }
 
+  public async findAttemptsByInvoiceId(invoiceId: number): Promise<PaymentAttemptRecord[]> {
+    try {
+      const res = await db.query<PaymentAttemptRecord>(
+        `SELECT * FROM payment_attempts WHERE invoice_id = $1 ORDER BY received_at DESC`,
+        [invoiceId]
+      );
+      return res.rows;
+    } catch {
+      return Array.from(memoryAttempts.values()).filter((att) => att.invoice_id === invoiceId);
+    }
+  }
+
   public async findAllAttempts(): Promise<PaymentAttemptRecord[]> {
     try {
       const res = await db.query<PaymentAttemptRecord>(

@@ -5,6 +5,7 @@ import { sessionRepository } from '../repositories/session.repository.js';
 import { simulatorClient } from '../simulator/client/simulator-client.js';
 import { billingService } from '../services/billing.service.js';
 import { allocationService } from '../services/allocation.service.js';
+import { exitQueueService } from '../services/exit-queue.service.js';
 import { db } from '../database/postgres.js';
 
 export async function getDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -67,6 +68,10 @@ export async function getDashboardStats(req: Request, res: Response, next: NextF
         },
         paymentAttemptsCount: attempts.length,
         recentAttempts: attempts.slice(0, 10),
+        exitQueue: {
+          queuedPlates: exitQueueService.getQueuedPlates(),
+          heldVehicles: exitQueueService.getHeldVehicles(),
+        },
       },
       requestId: req.requestId,
     });

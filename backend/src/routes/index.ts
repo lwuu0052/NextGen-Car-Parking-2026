@@ -4,6 +4,7 @@ import { getParkingSpots, getDevices, postDeviceCommand } from '../controllers/p
 import { handleSimulatorWebhook } from '../controllers/webhook.controller.js';
 import { recommendSpot, getActiveSessions } from '../controllers/allocation.controller.js';
 import { getDashboardStats, listInvoices, simulatePayment, resetSystemState } from '../controllers/dashboard.controller.js';
+import { getExitQueueState, forceReleaseHeldVehicle, retryHeldVehiclePayment } from '../controllers/exit-queue.controller.js';
 import { syncService } from '../services/sync.service.js';
 
 export const router = Router();
@@ -31,6 +32,11 @@ router.get('/api/dashboard/stats', getDashboardStats);
 router.get('/api/invoices', listInvoices);
 router.post('/api/payments/simulate', simulatePayment);
 router.post('/api/system/reset', resetSystemState);
+
+// Exit queue / anti-fare-evasion operator controls
+router.get('/api/exit-queue/state', getExitQueueState);
+router.post('/api/exit-queue/:plate/force-release', forceReleaseHeldVehicle);
+router.post('/api/exit-queue/:plate/retry-payment', retryHeldVehiclePayment);
 
 
 // Base data sync endpoint
