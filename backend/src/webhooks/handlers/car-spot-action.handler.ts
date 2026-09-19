@@ -1,11 +1,8 @@
 import { CarSpotActionEventPayload } from '../models/webhook-event.model.js';
 import { parkingSpotRepository } from '../../repositories/parking-spot.repository.js';
-import { sessionRepository } from '../../repositories/session.repository.js';
-import { invoiceRepository } from '../../repositories/invoice.repository.js';
 import { simulatorClient } from '../../simulator/client/simulator-client.js';
 import { allocationService } from '../../services/allocation.service.js';
 import { sessionService } from '../../services/session.service.js';
-import { billingService } from '../../services/billing.service.js';
 import { exitQueueService } from '../../services/exit-queue.service.js';
 import { config } from '../../config/index.js';
 
@@ -67,20 +64,8 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
         console.error(`[Auto Gate Control] Error opening gateA:`, err.message);
       }
 
-      // Also open any closed barrier
-      try {
-        const barriers = await simulatorClient.listBarriers();
-        for (const b of barriers) {
-          if (b.State === 'Closed' || b.State === 'Closing') {
-            await simulatorClient.openGate(b.Name);
-          }
-        }
-      } catch {
-        // Fallback
-      }
-
       // Wait a short duration for barrier opening transition to settle
-      await new Promise((resolve) => setTimeout(resolve, 350));
+      await simulatorClient.waitForGateState('gateA', 'Open', 1200, 100);
 
       // Allocate optimal parking spot based on car type & distance
       if (carPlate) {

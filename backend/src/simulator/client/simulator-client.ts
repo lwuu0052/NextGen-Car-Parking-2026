@@ -119,8 +119,9 @@ export class SimulatorClient {
     while (Date.now() <= deadline) {
       try {
         const barriers = await this.listBarriers();
-        const gate = barriers.find((b) => b.Name === gateName);
-        if (gate?.State === expectedState) {
+        const gate = barriers.find((b: any) => (b.Name || b.name) === gateName);
+        const state = (gate as any)?.State || (gate as any)?.state;
+        if (state === expectedState) {
           return true;
         }
       } catch {
