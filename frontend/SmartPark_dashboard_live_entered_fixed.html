@@ -663,8 +663,8 @@
       135deg,
       transparent,
       transparent 2px,
-      rgba(255, 255, 255, 0.30) 2px,
-      rgba(255, 255, 255, 0.30) 4px
+      rgba(255, 255, 255, 0.3) 2px,
+      rgba(255, 255, 255, 0.3) 4px
     );
   }
 
@@ -1402,7 +1402,12 @@
           <span>Sign In</span>
         </button>
 
-        <button class="top-tool icon-only" type="button" title="Settings" aria-label="Settings">
+        <button
+          class="top-tool icon-only"
+          type="button"
+          title="Settings"
+          aria-label="Settings"
+        >
           <svg
             width="15"
             height="15"
@@ -1412,11 +1417,18 @@
             stroke-width="2"
           >
             <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20.3h-3v-.08a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7.02 15a1.7 1.7 0 0 0-1.56-1.03H5.4v-3h.06A1.7 1.7 0 0 0 7.02 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06A1.7 1.7 0 0 0 10.68 5a1.7 1.7 0 0 0 1.03-1.56V3.4h3v.04A1.7 1.7 0 0 0 15.74 5a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21v3h-.04A1.7 1.7 0 0 0 19.4 15z"></path>
+            <path
+              d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20.3h-3v-.08a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7.02 15a1.7 1.7 0 0 0-1.56-1.03H5.4v-3h.06A1.7 1.7 0 0 0 7.02 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06A1.7 1.7 0 0 0 10.68 5a1.7 1.7 0 0 0 1.03-1.56V3.4h3v.04A1.7 1.7 0 0 0 15.74 5a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.03H21v3h-.04A1.7 1.7 0 0 0 19.4 15z"
+            ></path>
           </svg>
         </button>
 
-        <button class="top-tool icon-only notification-tool" type="button" title="Notifications" aria-label="Notifications">
+        <button
+          class="top-tool icon-only notification-tool"
+          type="button"
+          title="Notifications"
+          aria-label="Notifications"
+        >
           <svg
             width="15"
             height="15"
@@ -1424,7 +1436,9 @@
             fill="currentColor"
             aria-hidden="true"
           >
-            <path d="M18 8a6 6 0 1 0-12 0c0 5.2-2.1 7.4-3 8.2-.3.3-.1.8.3.8h17.4c.4 0 .6-.5.3-.8-.9-.8-3-3-3-8.2z"></path>
+            <path
+              d="M18 8a6 6 0 1 0-12 0c0 5.2-2.1 7.4-3 8.2-.3.3-.1.8.3.8h17.4c.4 0 .6-.5.3-.8-.9-.8-3-3-3-8.2z"
+            ></path>
             <path d="M10 20h4a2 2 0 0 1-4 0z"></path>
           </svg>
           <span class="notification-dot"></span>
@@ -1439,29 +1453,29 @@
           <div class="stat-top">
             <span class="stat-label">Entered Car</span>
           </div>
-          <div class="stat-value">16<small>&nbsp;vehicles</small></div>
+          <div class="stat-value" id="enteredCarStat">0<small>&nbsp;vehicles</small></div>
         </div>
         <div class="stat-card">
           <div class="stat-top"><span class="stat-label">Free spots</span></div>
-          <div class="stat-value">34<small>&nbsp;/ 50</small></div>
+          <div class="stat-value" id="freeSpotsStat">0<small>&nbsp;/ 0</small></div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
             <span class="stat-label">Unparked Car</span>
           </div>
-          <div class="stat-value">2<small>&nbsp;/ 16</small></div>
+          <div class="stat-value" id="unparkedCarStat">0<small>&nbsp;/ 0</small></div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
             <span class="stat-label">Revenue today</span>
           </div>
-          <div class="stat-value">$642</div>
+          <div class="stat-value" id="revenueTodayStat">$0.00</div>
         </div>
         <div class="stat-card">
           <div class="stat-top">
             <span class="stat-label">Active alerts</span>
           </div>
-          <div class="stat-value">2</div>
+          <div class="stat-value" id="activeAlertsStat">0</div>
         </div>
       </section>
 
@@ -1483,35 +1497,25 @@
             <div class="bay-grid" id="bayGrid"></div>
             <div class="legend">
               <div class="legend-item">
-                <span
-                  class="legend-dot"
-                  style="background: #18a558"
-                ></span
-                >Free
+                <span class="legend-dot" style="background: #18a558"></span>Free
               </div>
               <div class="legend-item">
-                <span
-                  class="legend-dot"
-                  style="background: #e5484d"
-                ></span
+                <span class="legend-dot" style="background: #e5484d"></span
                 >Occupied
               </div>
               <div class="legend-item">
-                <span class="legend-dot" style="background: #ffffff; border: 1px solid #9aa1ae"></span
+                <span
+                  class="legend-dot"
+                  style="background: #ffffff; border: 1px solid #9aa1ae"
+                ></span
                 >Electric
               </div>
               <div class="legend-item">
-                <span
-                  class="legend-dot"
-                  style="background: #3b7cf6"
-                ></span
+                <span class="legend-dot" style="background: #3b7cf6"></span
                 >Accessible
               </div>
               <div class="legend-item">
-                <span
-                  class="legend-dot"
-                  style="background: #f5c542"
-                ></span
+                <span class="legend-dot" style="background: #f5c542"></span
                 >Maintenance
               </div>
               <div class="legend-item">
@@ -1527,7 +1531,7 @@
             <div class="hint">Live — reflects open/close travel time</div>
           </div>
           <div class="panel-body">
-            <div class="gate-card" id="entryCard">
+            <div class="gate-card" id="entryCard" data-device-name="gateA">
               <div class="gate-card-top">
                 <div class="gate-name">
                   <span class="gdot" style="background: var(--danger)"></span
@@ -1540,11 +1544,11 @@
               <div class="gate-actions">
                 <button
                   class="btn primary"
-                  onclick="toggleGate('entry', 'open')"
+                  onclick="sendGateCommand('entry', 'open')"
                 >
                   Open
                 </button>
-                <button class="btn" onclick="toggleGate('entry', 'close')">
+                <button class="btn" onclick="sendGateCommand('entry', 'close')">
                   Close
                 </button>
               </div>
@@ -1558,7 +1562,7 @@
                 Last action: closed, 3m ago
               </div>
             </div>
-            <div class="gate-card" id="exitCard">
+            <div class="gate-card" id="exitCard" data-device-name="gateB">
               <div class="gate-card-top">
                 <div class="gate-name">
                   <span class="gdot" style="background: var(--success)"></span
@@ -1569,12 +1573,12 @@
                 >
               </div>
               <div class="gate-actions">
-                <button class="btn" onclick="toggleGate('exit', 'open')">
+                <button class="btn" onclick="sendGateCommand('exit', 'open')">
                   Open
                 </button>
                 <button
                   class="btn primary"
-                  onclick="toggleGate('exit', 'close')"
+                  onclick="sendGateCommand('exit', 'close')"
                 >
                   Close
                 </button>
@@ -1623,7 +1627,7 @@
         <div class="panel">
           <div class="panel-head">
             <h2>Spot mix</h2>
-            <div class="hint">50 bays across 3 zones</div>
+            <div class="hint" id="spotMixHint">Loading live parking data…</div>
           </div>
           <div class="panel-body">
             <div class="chart-row">
@@ -1642,7 +1646,7 @@
                     cy="66"
                     r="52"
                     fill="none"
-                    stroke="var(--success)"
+                    id="spotMixFreeArc" stroke="var(--success)"
                     stroke-width="16"
                     stroke-dasharray="326.7"
                     stroke-dashoffset="0"
@@ -1654,7 +1658,7 @@
                     cy="66"
                     r="52"
                     fill="none"
-                    stroke="var(--danger)"
+                    id="spotMixOccupiedArc" stroke="var(--danger)"
                     stroke-width="16"
                     stroke-dasharray="52.3 326.7"
                     stroke-dashoffset="-212.4"
@@ -1665,7 +1669,7 @@
                     cy="66"
                     r="52"
                     fill="none"
-                    stroke="var(--info)"
+                    id="spotMixElectricArc" stroke="var(--info)"
                     stroke-width="16"
                     stroke-dasharray="32.7 326.7"
                     stroke-dashoffset="-264.7"
@@ -1676,7 +1680,7 @@
                     cy="66"
                     r="52"
                     fill="none"
-                    stroke="var(--accent)"
+                    id="spotMixAccessibleArc" stroke="var(--accent)"
                     stroke-width="16"
                     stroke-dasharray="19.6 326.7"
                     stroke-dashoffset="-297.4"
@@ -1687,35 +1691,35 @@
                     cy="66"
                     r="52"
                     fill="none"
-                    stroke="var(--muted-spot)"
+                    id="spotMixMaintenanceArc" stroke="var(--muted-spot)"
                     stroke-width="16"
                     stroke-dasharray="9.8 326.7"
                     stroke-dashoffset="-317"
                     transform="rotate(-90 66 66)"
                   />
                 </svg>
-                <div class="donut-center"><b>50</b><span>total bays</span></div>
+                <div class="donut-center"><b id="spotMixTotal">0</b><span>total bays</span></div>
               </div>
               <div class="donut-legend">
                 <div class="dl-row">
                   <span class="dl-dot" style="background: var(--success)"></span
                   ><span class="dl-name">Free</span
-                  ><span class="dl-val">32</span>
+                  ><span class="dl-val" id="spotMixFree">0</span>
                 </div>
                 <div class="dl-row">
                   <span class="dl-dot" style="background: var(--danger)"></span
                   ><span class="dl-name">Occupied</span
-                  ><span class="dl-val">8</span>
+                  ><span class="dl-val" id="spotMixOccupied">0</span>
                 </div>
                 <div class="dl-row">
                   <span class="dl-dot" style="background: var(--info)"></span
                   ><span class="dl-name">Electric</span
-                  ><span class="dl-val">5</span>
+                  ><span class="dl-val" id="spotMixElectric">0</span>
                 </div>
                 <div class="dl-row">
                   <span class="dl-dot" style="background: var(--accent)"></span
                   ><span class="dl-name">Accessible</span
-                  ><span class="dl-val">3</span>
+                  ><span class="dl-val" id="spotMixAccessible">0</span>
                 </div>
                 <div class="dl-row">
                   <span
@@ -1723,7 +1727,7 @@
                     style="background: var(--muted-spot)"
                   ></span
                   ><span class="dl-name">Maintenance</span
-                  ><span class="dl-val">2</span>
+                  ><span class="dl-val" id="spotMixMaintenance">0</span>
                 </div>
               </div>
             </div>
@@ -1788,7 +1792,7 @@
                   <th>Details</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="recentActivityBody">
                 <tr>
                   <td class="td-muted">10:42</td>
                   <td class="mono plate">WBC 101</td>
@@ -1831,7 +1835,7 @@
 
         <div class="panel">
           <div class="panel-head"><h2>Alerts &amp; maintenance</h2></div>
-          <div class="panel-body">
+          <div class="panel-body" id="alertsBody">
             <div class="alert-item">
               <div class="alert-ico crit">
                 <svg
@@ -1926,50 +1930,188 @@
 </div>
 
 <script>
-  const zones = [
-    [
-      ["S101", "free"],
-      ["S102", "occupied"],
-      ["S103", "free"],
-      ["S104", "free"],
-      ["S105", "electric"],
-      ["S106", "maintenance"],
-      ["S107", "free"],
-      ["S108", "occupied"],
-      ["S109", "free"],
-      ["S110", "free"],
-      ["S111", "accessible"],
-      ["S112", "free"],
-    ],
-    [
-      ["S201", "occupied"],
-      ["S202", "free"],
-      ["S203", "free"],
-      ["S204", "broken"],
-      ["S205", "free"],
-      ["S206", "electric"],
-      ["S207", "occupied"],
-      ["S208", "free"],
-      ["S209", "accessible"],
-      ["S210", "free"],
-      ["S211", "free"],
-      ["S212", "occupied"],
-    ],
-    [
-      ["S301", "free"],
-      ["S302", "free"],
-      ["S303", "electric"],
-      ["S304", "free"],
-      ["S305", "occupied"],
-      ["S306", "free"],
-      ["S307", "free"],
-      ["S308", "accessible"],
-      ["S309", "free"],
-      ["S310", "maintenance"],
-      ["S311", "free"],
-      ["S312", "free"],
-    ],
-  ];
+  // Works both from http://localhost:3000/... and local file preview.
+  const API_BASE =
+    window.location.protocol === "file:" ? "http://localhost:3000" : "";
+
+  let zones = [[], [], []];
+
+  function getSpotStatus(spot) {
+    if (spot.broken) return "broken";
+    if (spot.isUnderMaintenance) return "maintenance";
+    if (spot.detectedCars > 0) return "occupied";
+
+    const carType = String(spot.parkingForCarType || "").toLowerCase();
+
+    if (carType === "electric") return "electric";
+    if (carType === "accessible") return "accessible";
+
+    return "free";
+  }
+
+  function updateSpotMix(parkSpots) {
+    const counts = {
+      free: 0,
+      occupied: 0,
+      electric: 0,
+      accessible: 0,
+      maintenance: 0,
+      broken: 0,
+    };
+
+    parkSpots.forEach((spot) => {
+      const status = getSpotStatus(spot);
+      if (counts[status] !== undefined) counts[status]++;
+    });
+
+    const total = parkSpots.length;
+    document.getElementById("spotMixTotal").textContent = total;
+    document.getElementById("spotMixFree").textContent = counts.free;
+    document.getElementById("spotMixOccupied").textContent = counts.occupied;
+    document.getElementById("spotMixElectric").textContent = counts.electric;
+    document.getElementById("spotMixAccessible").textContent = counts.accessible;
+    document.getElementById("spotMixMaintenance").textContent = counts.maintenance;
+
+    const uniqueZones = new Set(
+      parkSpots.map((spot) => spot.zoneParent).filter(Boolean)
+    ).size;
+    document.getElementById("spotMixHint").textContent =
+      `${total} bays across ${uniqueZones || 0} zone${uniqueZones === 1 ? "" : "s"}`;
+
+    // Existing donut uses radius 52, circumference ≈ 326.7.
+    const circumference = 326.7;
+    const arcData = [
+      ["spotMixFreeArc", counts.free],
+      ["spotMixOccupiedArc", counts.occupied],
+      ["spotMixElectricArc", counts.electric],
+      ["spotMixAccessibleArc", counts.accessible],
+      ["spotMixMaintenanceArc", counts.maintenance],
+    ];
+
+    let used = 0;
+    arcData.forEach(([id, count]) => {
+      const circle = document.getElementById(id);
+      if (!circle) return;
+
+      const length = total > 0 ? (count / total) * circumference : 0;
+      circle.setAttribute(
+        "stroke-dasharray",
+        `${length.toFixed(1)} ${circumference}`
+      );
+      circle.setAttribute("stroke-dashoffset", (-used).toFixed(1));
+      used += length;
+    });
+  }
+
+  function updateCarStats() {
+    // Use whichever source currently sees more cars.
+    // This fixes the common case where ENTRY1 already detects the first car
+    // while activeSessionsCount is still temporarily 0.
+    const enteredCars = Math.max(latestSessionCars, latestObservedCars);
+
+    const unparkedCars = Math.max(
+      0,
+      enteredCars - latestParkedCars
+    );
+
+    const enteredStat = document.getElementById("enteredCarStat");
+    if (enteredStat) {
+      enteredStat.innerHTML =
+        `${enteredCars}<small>&nbsp;vehicles</small>`;
+    }
+
+    const unparkedStat = document.getElementById("unparkedCarStat");
+    if (unparkedStat) {
+      unparkedStat.innerHTML =
+        `${unparkedCars}<small>&nbsp;vehicles</small>`;
+    }
+  }
+
+  async function loadDashboardStats() {
+    try {
+      const response = await fetch(`${API_BASE}/api/dashboard/stats`);
+      if (!response.ok) {
+        throw new Error("Failed to load dashboard stats: " + response.status);
+      }
+
+      const result = await response.json();
+      const data = result?.data || {};
+
+      // Backend exposes totalRevenueMinor. "Minor" means the smallest
+      // currency unit, so 288 is displayed as 2.88.
+      if (typeof data.totalRevenueMinor === "number") {
+        document.getElementById("revenueTodayStat").textContent =
+          "$" + (data.totalRevenueMinor / 100).toFixed(2);
+      }
+    } catch (error) {
+      console.error("Failed to load dashboard stats:", error);
+    }
+  }
+
+  async function loadParkingSpots() {
+    try {
+      const response = await fetch(`${API_BASE}/api/parking-spots`);
+
+      if (!response.ok) {
+        throw new Error("Failed to load parking spots: " + response.status);
+      }
+
+      const result = await response.json();
+      const allSpots = result?.data?.parkingSpots || [];
+
+      const parkSpots = allSpots
+        .filter((spot) => spot.purpose === "Park")
+        .sort((a, b) => {
+          const numA = parseInt(String(a.name).replace(/\D/g, ""), 10);
+          const numB = parseInt(String(b.name).replace(/\D/g, ""), 10);
+          return numA - numB;
+        });
+
+      const totalSpots = parkSpots.length;
+
+      const freeSpots = parkSpots.filter((spot) => {
+        return (
+          !spot.broken &&
+          !spot.isUnderMaintenance &&
+          Number(spot.detectedCars) === 0
+        );
+      }).length;
+
+      const freeSpotsStat = document.getElementById("freeSpotsStat");
+      if (freeSpotsStat) {
+        freeSpotsStat.innerHTML =
+          `${freeSpots}<small>&nbsp;/ ${totalSpots}</small>`;
+      }
+
+      updateSpotMix(parkSpots);
+
+      zones[0] = parkSpots
+        .filter((spot) => spot.zoneParent === "ZONE1")
+        .map((spot) => [spot.name, getSpotStatus(spot)]);
+
+      zones[1] = parkSpots
+        .filter((spot) => spot.zoneParent === "ZONE2")
+        .map((spot) => [spot.name, getSpotStatus(spot)]);
+
+      zones[2] = parkSpots
+        .filter((spot) => spot.zoneParent === "ZONE3")
+        .map((spot) => [spot.name, getSpotStatus(spot)]);
+
+      const activeButton = document.querySelector("#zoneTabs button.active");
+      const activeZone = activeButton ? Number(activeButton.dataset.zone) : 0;
+
+      renderZone(activeZone);
+    } catch (error) {
+      console.error("Failed to load parking spots:", error);
+
+      const grid = document.getElementById("bayGrid");
+      if (grid) {
+        grid.innerHTML =
+          '<div style="grid-column:1/-1;color:var(--danger);font-size:12px;padding:12px 0;">Unable to load parking spots from backend.</div>';
+      }
+    }
+  }
+
   const icons = {
     free: '<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
     occupied:
@@ -1985,10 +2127,18 @@
   };
   function renderZone(i) {
     const grid = document.getElementById("bayGrid");
-    grid.innerHTML = zones[i]
+    const zone = Array.isArray(zones[i]) ? zones[i] : [];
+
+    if (zone.length === 0) {
+      grid.innerHTML =
+        '<div style="grid-column:1/-1;color:var(--text-faint);font-size:12px;padding:12px 0;">Loading parking spots…</div>';
+      return;
+    }
+
+    grid.innerHTML = zone
       .map(
         ([name, status]) =>
-          `<div class="bay ${status}">${icons[status]}<span>${name}</span></div>`,
+          `<div class="bay ${status}">${icons[status] || ""}<span>${name}</span></div>`,
       )
       .join("");
   }
@@ -2001,21 +2151,19 @@
     btn.classList.add("active");
     renderZone(Number(btn.dataset.zone));
   });
-  renderZone(0);
-
-  /* ---------- Sidebar collapse ---------- */
+/* ---------- Sidebar collapse ---------- */
   const appEl = document.getElementById("app");
   document.getElementById("menuBtn").addEventListener("click", () => {
     appEl.classList.toggle("collapsed");
   });
   if (window.innerWidth <= 760) appEl.classList.add("collapsed");
 
-  /* ---------- Gates: dynamic open/close with travel time ---------- */
+  /* ---------- Gates: live backend state + commands ---------- */
   const gate = {
-    entry: { state: "closed", cycles: 205, busy: false },
-    exit: { state: "open", cycles: 437, busy: false },
+    entry: { state: "closed", busy: false, deviceName: "gateA" },
+    exit: { state: "closed", busy: false, deviceName: "gateB" },
   };
-  const CYCLE_MAX = 500;
+
   const pillMarkup = {
     open: "Open",
     closed: "Closed",
@@ -2027,6 +2175,7 @@
     const g = gate[which];
     const pill = document.getElementById(which + "Pill");
     const label = pillMarkup[g.state] || g.state;
+
     pill.innerHTML = '<span class="livedot"></span>' + label;
     pill.className =
       "status-pill " +
@@ -2034,8 +2183,6 @@
 
     const card = document.getElementById(which + "Card");
     const buttons = card.querySelectorAll(".gate-actions .btn");
-
-    // Highlight the selected/current gate state with the white button.
     const selectedAction =
       g.state === "open" || g.state === "opening" ? "open" : "close";
 
@@ -2045,90 +2192,381 @@
       b.classList.toggle("primary", action === selectedAction);
     });
 
-    const pct = Math.round((g.cycles / CYCLE_MAX) * 100);
-    card.querySelector(".cycle-fill").style.width = pct + "%";
-    card.querySelector(".cycle-fill").classList.toggle("warn", pct >= 80);
-    card.querySelector(".cycle-label").textContent =
-      g.cycles + "/" + CYCLE_MAX + " cycles";
+    // The simulator device endpoint currently does not expose usage cycles.
+    const cycleLabel = card.querySelector(".cycle-label");
+    const cycleFill = card.querySelector(".cycle-fill");
+    if (cycleLabel) cycleLabel.textContent = "Live state";
+    if (cycleFill) {
+      cycleFill.style.width = g.state === "open" ? "100%" : "0%";
+      cycleFill.classList.remove("warn");
+    }
   }
 
-  function toggleGate(which, action) {
-    const g = gate[which];
-    const currentAction =
-      g.state === "open" || g.state === "opening" ? "open" : "close";
+  async function loadDevices() {
+    try {
+      const response = await fetch(`${API_BASE}/api/devices`);
+      if (!response.ok) throw new Error("Device API " + response.status);
 
-    if (g.busy || currentAction === action) return;
+      const result = await response.json();
+      const devices = result?.data?.devices || {};
+      const barriers = devices.barriers || [];
+
+      for (const which of ["entry", "exit"]) {
+        const deviceName = gate[which].deviceName;
+        const barrier = barriers.find((b) => b.name === deviceName);
+        if (!barrier) continue;
+
+        gate[which].state = String(barrier.state || "closed").toLowerCase();
+        gate[which].busy =
+          gate[which].state === "opening" || gate[which].state === "closing";
+        paintGate(which);
+
+        const last = document.getElementById(which + "Last");
+        if (last) {
+          last.textContent =
+            `${deviceName} · ${barrier.zoneParent || "No zone"} · ` +
+            (barrier.broken ? "Broken" :
+              barrier.isUnderMaintenance ? "Under maintenance" : "Operational");
+        }
+      }
+
+      updateEnvironmentFromDevices(devices);
+      updateAlertsFromLiveData();
+    } catch (error) {
+      console.error("Failed to load devices:", error);
+    }
+  }
+
+  async function sendGateCommand(which, action) {
+    const g = gate[which];
+    if (g.busy) return;
 
     g.busy = true;
     g.state = action === "open" ? "opening" : "closing";
     paintGate(which);
 
-    setTimeout(() => {
-      // Use "closed", not "close", so the status pill never shows "undefined".
-      g.state = action === "open" ? "open" : "closed";
+    try {
+      // Backend route already exists: POST /api/devices/:id/commands
+      // The command is sent as { command: "open" | "close" }.
+      const response = await fetch(
+        `${API_BASE}/api/devices/${encodeURIComponent(g.deviceName)}/commands`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command: action }),
+        }
+      );
+
+      if (!response.ok) {
+        const detail = await response.text().catch(() => "");
+        throw new Error(`Command failed (${response.status}) ${detail}`);
+      }
+
+      // Refresh immediately, then again shortly after for Opening/Closing travel time.
+      await loadDevices();
+      setTimeout(loadDevices, 700);
+      setTimeout(loadDevices, 1500);
+    } catch (error) {
+      console.error("Gate command failed:", error);
+      alert(
+        `Could not ${action} ${g.deviceName}. ` +
+        `If your backend expects a different command body, update sendGateCommand().`
+      );
+      await loadDevices();
+    } finally {
       g.busy = false;
-      g.cycles = Math.min(CYCLE_MAX, g.cycles + 1);
       paintGate(which);
-
-      document.getElementById(which + "Last").textContent =
-        "Last action: " +
-        (action === "open" ? "opened" : "closed") +
-        ", just now";
-    }, 1200);
+    }
   }
-  paintGate("entry");
-  paintGate("exit");
 
-  /* ---------- Zone environment: live CO, auto fan/light rules ---------- */
+  /* ---------- Zone environment: live devices when available ---------- */
   let isNight = false;
-  const CO_FAN_THRESHOLD = 50;
-  const envZones = [
-    { name: "Zone 1", co: 38, fanMode: "auto", lightMode: "auto" },
-    { name: "Zone 2", co: 64, fanMode: "auto", lightMode: "auto" },
-    { name: "Zone 3", co: 21, fanMode: "auto", lightMode: "auto" },
-  ];
-  function effectiveOn(mode, autoValue) {
-    if (mode === "auto") return autoValue;
-    return mode === "on";
+  const environmentState = new Map();
+
+  function zoneDisplayName(zoneName) {
+    const m = String(zoneName || "").match(/(\d+)/);
+    return m ? `Zone ${m[1]}` : (zoneName || "Unassigned");
   }
-  function cycleMode(mode) {
-    return mode === "auto" ? "on" : mode === "on" ? "off" : "auto";
-  }
-  function renderEnv() {
+
+  function updateEnvironmentFromDevices(devices) {
+    const lights = devices?.lights || [];
+    const fans = devices?.exhaustFans || [];
+
+    // /api/devices currently exposes lights and fans, but not CO.
+    // Keep a card per zone seen in the live device data.
+    const zoneNames = new Set(
+      [...lights, ...fans]
+        .map((d) => d.zoneParent)
+        .filter(Boolean)
+    );
+
+    if (zoneNames.size === 0) zoneNames.add("ZONE1");
+
+    const cards = [];
+    for (const zoneName of [...zoneNames].sort()) {
+      const zoneLights = lights.filter((d) => d.zoneParent === zoneName);
+      const zoneFans = fans.filter((d) => d.zoneParent === zoneName);
+
+      const lightsOn =
+        zoneLights.length > 0 && zoneLights.some((d) => Boolean(d.isOn));
+      const fansOn =
+        zoneFans.length > 0 && zoneFans.some((d) => Boolean(d.isOn));
+
+      cards.push({
+        name: zoneDisplayName(zoneName),
+        rawName: zoneName,
+        co: null,
+        lightsOn,
+        fansOn,
+        lightCount: zoneLights.length,
+        fanCount: zoneFans.length,
+      });
+    }
+
     const grid = document.getElementById("envGrid");
-    grid.innerHTML = envZones
-      .map((z, i) => {
-        const warn = z.co >= CO_FAN_THRESHOLD;
-        const fanOn = effectiveOn(z.fanMode, warn);
-        const lightOn = effectiveOn(z.lightMode, isNight);
+    grid.innerHTML = cards
+      .map((z) => {
+        const coText = z.co == null ? "CO unavailable" : `${z.co} ppm`;
         return `<div class="env-card">
-      <div class="env-top"><span class="env-zone">${z.name}</span><span class="co-badge ${warn ? "co-warn" : "co-ok"}">${z.co} ppm</span></div>
-      <div class="co-track"><div class="co-fill" style="width:${Math.min(z.co, 100)}%;background:${warn ? "var(--danger)" : "var(--success)"}"></div></div>
-      <div class="env-toggles">
-        <div class="toggle-chip ${fanOn ? "on" : ""}" onclick="cycleEnv(${i},'fan')"><span class="dotlive"></span>Fan${z.fanMode === "auto" ? '<span class="auto-tag">auto</span>' : ""}</div>
-        <div class="toggle-chip ${lightOn ? "on" : ""}" onclick="cycleEnv(${i},'light')"><span class="dotlive"></span>Lights${z.lightMode === "auto" ? '<span class="auto-tag">auto</span>' : ""}</div>
-      </div>
-    </div>`;
+          <div class="env-top">
+            <span class="env-zone">${z.name}</span>
+            <span class="co-badge co-ok">${coText}</span>
+          </div>
+          <div class="co-track">
+            <div class="co-fill" style="width:0%;background:var(--success)"></div>
+          </div>
+          <div class="env-toggles">
+            <div class="toggle-chip ${z.fansOn ? "on" : ""}">
+              <span class="dotlive"></span>
+              Fan
+              <span class="auto-tag">${z.fanCount ? "LIVE" : "N/A"}</span>
+            </div>
+            <div class="toggle-chip ${z.lightsOn ? "on" : ""}">
+              <span class="dotlive"></span>
+              Lights
+              <span class="auto-tag">${z.lightCount ? "LIVE" : "N/A"}</span>
+            </div>
+          </div>
+        </div>`;
       })
       .join("");
   }
-  function cycleEnv(i, which) {
-    const z = envZones[i];
-    if (which === "fan") z.fanMode = cycleMode(z.fanMode);
-    else z.lightMode = cycleMode(z.lightMode);
-    renderEnv();
-  }
+
   function toggleNight() {
     isNight = !isNight;
     document.getElementById("nightSwitch").classList.toggle("on", isNight);
-    renderEnv();
   }
-  renderEnv();
-  setInterval(() => {
-    envZones.forEach((z) => {
-      const drift = Math.round((Math.random() - 0.45) * 9);
-      z.co = Math.max(6, Math.min(96, z.co + drift));
-    });
-    renderEnv();
-  }, 3500);
+
+  /* ---------- Dashboard stats / sessions / invoices ---------- */
+  async function loadDashboardStats() {
+    try {
+      const response = await fetch(`${API_BASE}/api/dashboard/stats`);
+      if (!response.ok) throw new Error("Stats API " + response.status);
+
+      const result = await response.json();
+      const data = result?.data || {};
+
+      // Backend active sessions are useful, but can be slightly delayed
+      // immediately after ENTRY1 detects a new car.
+      latestSessionCars = Number(data.activeSessionsCount || 0);
+
+      updateCarStats();
+
+      if (typeof data.totalRevenueMinor === "number") {
+        document.getElementById("revenueTodayStat").textContent =
+          "$" + (data.totalRevenueMinor / 100).toFixed(2);
+      }
+
+      updateRecentActivityFromAttempts(data.recentAttempts || []);
+    } catch (error) {
+      console.error("Failed to load dashboard stats:", error);
+    }
+  }
+
+  function formatTime(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  function plateFromPaymentId(id) {
+    const m = String(id || "").match(/_([A-Z]{2,4}\d{2,4})$/i);
+    return m ? m[1] : "—";
+  }
+
+  function updateRecentActivityFromAttempts(attempts) {
+    const body = document.getElementById("recentActivityBody");
+    if (!body) return;
+
+    const recent = attempts.slice(-5).reverse();
+    body.innerHTML = recent.length
+      ? recent.map((a) => `
+          <tr>
+            <td class="td-muted">${formatTime(a.received_at)}</td>
+            <td class="mono plate">${plateFromPaymentId(a.external_payment_id)}</td>
+            <td>—</td>
+            <td><span class="ev-badge ev-pay">Payment</span></td>
+            <td class="td-muted">
+              ${(Number(a.reported_amount_minor || 0) / 100).toFixed(2)}
+              · ${a.verification_status || "unknown"}
+            </td>
+          </tr>
+        `).join("")
+      : `<tr><td colspan="5" class="td-muted">No recent payment activity</td></tr>`;
+  }
+
+  let latestParkingSpots = [];
+  let latestDevices = { barriers: [], lights: [], exhaustFans: [] };
+
+  // Cars currently detected in formal purpose="Park" spots.
+  let latestParkedCars = 0;
+
+  // Backend active sessions can lag briefly just after a car enters.
+  let latestSessionCars = 0;
+
+  // Real-time simulator sensors (Entry/Park/Exit/etc.) update faster.
+  let latestObservedCars = 0;
+
+  const originalLoadParkingSpots = loadParkingSpots;
+  loadParkingSpots = async function () {
+    try {
+      const response = await fetch(`${API_BASE}/api/parking-spots`);
+      if (!response.ok) throw new Error("Parking API " + response.status);
+
+      const result = await response.json();
+      const allSpots = result?.data?.parkingSpots || [];
+      const parkSpots = allSpots
+        .filter((spot) => spot.purpose === "Park")
+        .sort((a, b) => {
+          const numA = parseInt(String(a.name).replace(/\D/g, ""), 10);
+          const numB = parseInt(String(b.name).replace(/\D/g, ""), 10);
+          return numA - numB;
+        });
+
+      latestParkingSpots = parkSpots;
+
+      // Cars physically detected in formal parking bays.
+      latestParkedCars = parkSpots.reduce(
+        (total, spot) => total + Number(spot.detectedCars || 0),
+        0
+      );
+
+      // Count cars detected anywhere in the facility, including EntrySpot,
+      // ExitSpot and LeaveParking sensors. This usually reacts faster than
+      // activeSessionsCount immediately after a car enters.
+      latestObservedCars = allSpots.reduce(
+        (total, spot) => total + Number(spot.detectedCars || 0),
+        0
+      );
+
+      updateCarStats();
+
+      const totalSpots = parkSpots.length;
+      const freeSpots = parkSpots.filter((spot) =>
+        !spot.broken &&
+        !spot.isUnderMaintenance &&
+        Number(spot.detectedCars) === 0
+      ).length;
+
+      const freeSpotsStat = document.getElementById("freeSpotsStat");
+      if (freeSpotsStat) {
+        freeSpotsStat.innerHTML =
+          `${freeSpots}<small>&nbsp;/ ${totalSpots}</small>`;
+      }
+
+      updateSpotMix(parkSpots);
+
+      zones[0] = parkSpots
+        .filter((spot) => spot.zoneParent === "ZONE1")
+        .map((spot) => [spot.name, getSpotStatus(spot)]);
+
+      zones[1] = parkSpots
+        .filter((spot) => spot.zoneParent === "ZONE2")
+        .map((spot) => [spot.name, getSpotStatus(spot)]);
+
+      zones[2] = parkSpots
+        .filter((spot) => spot.zoneParent === "ZONE3")
+        .map((spot) => [spot.name, getSpotStatus(spot)]);
+
+      const activeButton = document.querySelector("#zoneTabs button.active");
+      const activeZone = activeButton ? Number(activeButton.dataset.zone) : 0;
+      renderZone(activeZone);
+      updateAlertsFromLiveData();
+    } catch (error) {
+      console.error("Failed to load parking spots:", error);
+      const grid = document.getElementById("bayGrid");
+      if (grid) {
+        grid.innerHTML =
+          '<div style="grid-column:1/-1;color:var(--danger);font-size:12px;padding:12px 0;">Cannot load parking spots. Make sure backend is running on localhost:3000.</div>';
+      }
+    }
+  };
+
+  async function refreshLiveData() {
+    // Run all requests concurrently so Entered Car is not delayed by
+    // the parking-spots request. Entered/Unparked Car recalculates whenever
+    // either session data or simulator sensor data finishes updating.
+    await Promise.allSettled([
+      loadParkingSpots(),
+      loadDevices(),
+      loadDashboardStats(),
+    ]);
+  }
+
+  function updateAlertsFromLiveData() {
+    const alerts = [];
+
+    for (const spot of latestParkingSpots) {
+      if (spot.broken) {
+        alerts.push({
+          cls: "crit",
+          title: `Spot ${spot.name} broken`,
+          sub: `${spot.zoneParent || "No zone"} · repair required`,
+        });
+      } else if (spot.isUnderMaintenance) {
+        alerts.push({
+          cls: "warn",
+          title: `Spot ${spot.name} under maintenance`,
+          sub: `${spot.zoneParent || "No zone"} · maintenance in progress`,
+        });
+      }
+    }
+
+    const body = document.getElementById("alertsBody");
+    const stat = document.getElementById("activeAlertsStat");
+    if (stat) stat.textContent = alerts.length;
+
+    if (!body) return;
+
+    if (alerts.length === 0) {
+      body.innerHTML = `
+        <div class="alert-item">
+          <div class="alert-ico ok">✓</div>
+          <div class="alert-body">
+            <div class="alert-title">No active parking alerts</div>
+            <div class="alert-sub">Live backend reports no broken or maintenance parking spots.</div>
+          </div>
+          <div class="alert-time">live</div>
+        </div>`;
+      return;
+    }
+
+    body.innerHTML = alerts.slice(0, 6).map((a) => `
+      <div class="alert-item">
+        <div class="alert-ico ${a.cls}">!</div>
+        <div class="alert-body">
+          <div class="alert-title">${a.title}</div>
+          <div class="alert-sub">${a.sub}</div>
+        </div>
+        <div class="alert-time">live</div>
+      </div>
+    `).join("");
+  }
+
+  // One immediate load, then a modest refresh interval.
+  // The simulator API documentation warns against aggressive polling of simulator listing APIs,
+  // so the frontend polls the backend only.
+  refreshLiveData();
+  setInterval(refreshLiveData, 1000);
+
 </script>
