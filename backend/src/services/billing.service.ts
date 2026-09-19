@@ -14,6 +14,14 @@ export interface PaymentProcessingResult {
   attempt?: PaymentAttemptRecord | null;
 }
 
+export interface SimulatorChargeInvoice {
+  invoice: InvoiceRecord;
+  billableMinutes: number;
+  parkingCost: number;
+  chargingCost: number;
+  totalCost: number;
+}
+
 export class BillingService {
   /**
    * Generates or calculates the invoice for a parking session based on elapsed duration.
@@ -43,6 +51,36 @@ export class BillingService {
     }
 
     return invoice;
+  }
+
+  public async generateSimulatorChargeInvoice(
+    session: ParkingSessionRecord
+  ): Promise<SimulatorChargeInvoice> {
+    const arrivedAt = new Date(session.arrived_at).getTime();
+    const elapsedMs = Math.max(0, Date.now() - arrivedAt);
+    const billableMinutes = Math.max(1, Math.ceil(elapsedMs / 60000));
+    const isElectric = (session.car_type || '').toLowerCase().includes('electric');
+    const parkingCost = billableMinutes;
+    const chargingCost = isElectric ? billableMinutes * 2 : 0;
+    const totalCost = parkingCost + chargingCost;
+
+    const invoice = await invoiceRepository.createInvoice({
+      parking_session_id: session.id,
+      billable_minutes: billableMinutes,
+      rate_per_minute_minor: isElectric ? 3 : 1,
+      amount_due_minor: totalCost,
+      status: 'pending',
+    });
+
+    await sessionRepository.updateStatus(session.id, 'awaiting_payment').catch(() => null);
+
+    return {
+      invoice,
+      billableMinutes,
+      parkingCost,
+      chargingCost,
+      totalCost,
+    };
   }
 
   /**
@@ -192,7 +230,11 @@ export class BillingService {
         console.log(`[BillingService Auto Gate] Opening gateB for paid car "${carPlate}"...`);
         await simulatorClient.openGate('gateB').catch(() => {});
         await new Promise((resolve) => setTimeout(resolve, 350));
-        await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1').catch(() => {});
+        const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1');
+        console.log(`[BillingService Auto Gate] Dispatching paid car "${carPlate}" to ESCAPE1:`, dispatchResult);
+        setTimeout(async () => {
+          await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1').catch(() => {});
+        }, 300);
       } catch (err: any) {
         console.error(`[BillingService Auto Gate] Error dispatching paid car "${carPlate}":`, err.message);
       }

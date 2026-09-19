@@ -77,6 +77,28 @@ export class SimulatorClient {
     }
   }
 
+  public async chargeCar(
+    carName: string,
+    parkingCost: number,
+    chargingCost: number
+  ): Promise<{ success: boolean; message: string }> {
+    const params = new URLSearchParams({
+      parkingCost: String(parkingCost),
+      chargingCost: String(chargingCost),
+    });
+    const path = `/api/v1/car/${encodeURIComponent(carName)}/charge?${params.toString()}`;
+
+    try {
+      await this.rawRequest('POST', path, undefined, true);
+      return {
+        success: true,
+        message: `Payment requested from car ${carName} for parking=${parkingCost}, charging=${chargingCost}`,
+      };
+    } catch (err: any) {
+      return { success: false, message: `Failed to charge car ${carName}: ${err.message}` };
+    }
+  }
+
   // --- Gate Control Commands (State-Mutating POSTs - NEVER Blindly Retry) ---
   public async openGate(gateName: string): Promise<GateActionResult> {
     return this.executeGateControl(gateName, 'open', 'Open');

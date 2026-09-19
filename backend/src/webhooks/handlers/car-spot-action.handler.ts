@@ -1,6 +1,7 @@
 import { CarSpotActionEventPayload } from '../models/webhook-event.model.js';
 import { parkingSpotRepository } from '../../repositories/parking-spot.repository.js';
 import { sessionRepository } from '../../repositories/session.repository.js';
+import { invoiceRepository } from '../../repositories/invoice.repository.js';
 import { simulatorClient } from '../../simulator/client/simulator-client.js';
 import { allocationService } from '../../services/allocation.service.js';
 import { sessionService } from '../../services/session.service.js';
@@ -35,9 +36,12 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
   const isExitSpot =
     sTypeLower.includes('exit') ||
     sNameLower.includes('exit');
+  const isLeaveSpot =
+    sTypeLower.includes('leave') ||
+    sNameLower.includes('escape');
 
   // 1. Update spot status in DB if DB is available
-  if (spotName && !isEntrySpot && !isExitSpot) {
+  if (spotName && !isEntrySpot && !isExitSpot && !isLeaveSpot) {
     const spot = await parkingSpotRepository.findBySimulatorName(spotName).catch(() => null);
     if (spot) {
       const isOccupied = isCarIn;
@@ -109,16 +113,22 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
     return;
   }
 
+  // 3. Handle car fully leaving the parking lot
+  if (isLeaveSpot && carPlate) {
+    console.log(`[Session Lifecycle] Car "${carPlate}" reached leave spot "${spotName}". Marking departed.`);
+    await sessionService.markDeparted(carPlate);
+    return;
+  }
 
-  // 3. Handle Car Parked in assigned spot
-  if (!isEntrySpot && !isExitSpot && isCarIn && carPlate) {
+  // 4. Handle Car Parked in assigned spot
+  if (!isEntrySpot && !isExitSpot && !isLeaveSpot && isCarIn && carPlate) {
     console.log(`[Session Lifecycle] Car "${carPlate}" has parked in spot "${spotName}".`);
     await sessionService.markParked(carPlate);
     return;
   }
 
-  // 4. Handle Car Unparked / Leaving spot
-  if (!isEntrySpot && !isExitSpot && isCarOut && carPlate) {
+  // 5. Handle Car Unparked / Leaving spot
+  if (!isEntrySpot && !isExitSpot && !isLeaveSpot && isCarOut && carPlate) {
     console.log(`[Session Lifecycle] Car "${carPlate}" has unparked from spot "${spotName}".`);
     allocationService.releaseReservation(spotName);
     await sessionService.markUnparked(carPlate);
@@ -126,71 +136,65 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
   }
 
 
-  // 5. Handle Car Exit from parking lot & Payment Clearance
+  // 6. Handle Car Exit from parking lot & Payment Request
   if (isExitSpot && carPlate) {
+    if (!isCarIn) {
+      console.log(
+        `[Auto Exit Control] Ignoring non-arrival exit event for "${carPlate}" at ${spotName} (${rawDirection}).`
+      );
+      return;
+    }
+
     console.log(
-      `[Auto Exit Control] Vehicle "${carPlate}" arrived at exit spot (${spotName}). Processing billing invoice & payment clearance...`
+      `[Auto Exit Control] Vehicle "${carPlate}" arrived at exit spot (${spotName}). Requesting simulator payment...`
     );
 
-    // Generate invoice if needed & clear payment
     try {
       const activeSession = await sessionRepository.findActiveSessionByPlate(carPlate).catch(() => null);
       if (activeSession) {
-        const invoice = await billingService.generateInvoiceForSession(activeSession.id);
-        if (invoice && invoice.status !== 'paid') {
+        if (activeSession.status !== 'ready_to_exit' && activeSession.status !== 'awaiting_payment') {
           console.log(
-            `[Auto Billing] Generated invoice #${invoice.id} for Car "${carPlate}". Amount due: ${invoice.amount_due_minor} minor units (${invoice.billable_minutes} min).`
+            `[Auto Exit Control] Ignoring exit spot pass-through for "${carPlate}" while status is "${activeSession.status}".`
           );
-          await billingService.processPaymentEvent({
-            EventClass: 'payment_made',
-            CarPlateNumber: carPlate,
-            Amount: invoice.amount_due_minor,
-            EventId: `pay_${Date.now()}_${carPlate.replace(/\s+/g, '')}`,
-          });
+          return;
         }
+
+        if (activeSession.status === 'awaiting_payment') {
+          console.log(`[Auto Exit Control] Payment already requested for "${carPlate}". Skipping duplicate charge.`);
+          return;
+        }
+
+        const existingInvoice = await invoiceRepository.findInvoiceByPlateNumber(carPlate).catch(() => null);
+        if (existingInvoice?.status === 'paid') {
+          console.log(`[Auto Exit Control] "${carPlate}" already paid. Dispatching to leave point.`);
+          await simulatorClient.openGate('gateB').catch(() => {});
+          await new Promise((resolve) => setTimeout(resolve, 350));
+          const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1');
+          console.log(`[Auto Exit Control] Paid car dispatch result for "${carPlate}":`, dispatchResult);
+          return;
+        }
+
+        const charge = await billingService.generateSimulatorChargeInvoice(activeSession);
+        if (charge.invoice.status !== 'paid') {
+          console.log(
+            `[Auto Billing] Generated invoice #${charge.invoice.id} for Car "${carPlate}". ` +
+              `Requesting simulator charge: parking=${charge.parkingCost}, charging=${charge.chargingCost}, ` +
+              `total=${charge.totalCost} (${charge.billableMinutes} min).`
+          );
+          const chargeResult = await simulatorClient.chargeCar(
+            carPlate,
+            charge.parkingCost,
+            charge.chargingCost
+          );
+          console.log(`[Auto Billing] Simulator charge result for "${carPlate}":`, chargeResult);
+        }
+      } else {
+        console.warn(`[Auto Exit Control] No active session found for "${carPlate}". Payment request skipped.`);
       }
     } catch (err: any) {
-      console.warn(`[Auto Exit Control] Auto billing notice for ${carPlate}:`, err.message);
+      console.warn(`[Auto Exit Control] Payment request failed for ${carPlate}:`, err.message);
     }
 
-    // Open Exit Gate (gateB)
-
-    try {
-      await simulatorClient.openGate('gateB');
-    } catch (err: any) {
-      console.error(`[Auto Exit Gate Control] Error opening gateB:`, err.message);
-    }
-
-    // Open any closed barrier
-    try {
-      const barriers = await simulatorClient.listBarriers();
-      for (const b of barriers) {
-        if (b.State === 'Closed' || b.State === 'Closing') {
-          await simulatorClient.openGate(b.Name);
-        }
-      }
-    } catch {
-      // Fallback
-    }
-
-    // Wait a short duration for exit barrier opening transition to settle
-    await new Promise((resolve) => setTimeout(resolve, 350));
-
-    // Send car past the exit gate out of the parking lot
-    try {
-      const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1');
-      console.log(`[Auto Exit Control] Dispatching vehicle "${carPlate}" to ESCAPE1:`, dispatchResult);
-
-      // Issue confirmation dispatch after 300ms to guarantee pathfinding pickup
-      setTimeout(async () => {
-        await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1').catch(() => {});
-      }, 300);
-    } catch {
-      // Fallback
-    }
-
-    console.log(`[Session Lifecycle] Car "${carPlate}" has exited the parking lot.`);
-    await sessionService.markDeparted(carPlate);
     return;
   }
 }
