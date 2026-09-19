@@ -79,6 +79,10 @@ export class PaymentAttemptRepository {
       return Array.from(memoryAttempts.values());
     }
   }
+  public clearAll(): void {
+    memoryAttempts.clear();
+    memoryAttemptIdCounter = 1;
+  }
 }
 
 export const paymentAttemptRepository = new PaymentAttemptRepository();
