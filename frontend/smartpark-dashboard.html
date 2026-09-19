@@ -1,0 +1,656 @@
+<title>SmartPark Console</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root{
+  --bg:#eef0f4;
+  --surface:#ffffff;
+  --surface-alt:#f6f7fa;
+  --border:#e2e5ec;
+  --text:#171a22;
+  --text-muted:#6c7280;
+  --text-faint:#98a0af;
+  --sidebar-bg:#12141c;
+  --sidebar-bg-2:#181b25;
+  --sidebar-text:#9298a8;
+  --sidebar-text-active:#ffffff;
+  --accent:#f5b400;
+  --accent-ink:#3d2900;
+  --accent-soft:#fdf1cf;
+  --success:#18a558;
+  --success-soft:#e4f7ec;
+  --danger:#e5484d;
+  --danger-soft:#fdeaea;
+  --info:#3b7cf6;
+  --info-soft:#e9f0fe;
+  --muted-spot:#9aa1ae;
+  --muted-spot-soft:#eef0f3;
+  --accent-deep:#8a6100;
+  --shadow: 0 1px 2px rgba(20,22,30,.04), 0 8px 24px rgba(20,22,30,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0d12;
+    --surface:#151821;
+    --surface-alt:#1a1e29;
+    --border:#262b38;
+    --text:#e9ebf1;
+    --text-muted:#9aa1b2;
+    --text-faint:#6b7285;
+    --sidebar-bg:#0a0b10;
+    --sidebar-bg-2:#0f1117;
+    --accent-soft:#3a2e0a;
+    --success-soft:#0f2a1d;
+    --danger-soft:#341418;
+    --info-soft:#132038;
+    --muted-spot-soft:#1e222c;
+    --accent-deep:#e0ad2e;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0d12;
+  --surface:#151821;
+  --surface-alt:#1a1e29;
+  --border:#262b38;
+  --text:#e9ebf1;
+  --text-muted:#9aa1b2;
+  --text-faint:#6b7285;
+  --sidebar-bg:#0a0b10;
+  --sidebar-bg-2:#0f1117;
+  --accent-soft:#3a2e0a;
+  --success-soft:#0f2a1d;
+  --danger-soft:#341418;
+  --info-soft:#132038;
+  --muted-spot-soft:#1e222c;
+  --accent-deep:#e0ad2e;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:'Manrope',system-ui,sans-serif;margin:0;text-wrap:balance;}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;}
+button{font-family:inherit;}
+
+.app{display:flex;min-height:100vh;}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  width:240px;flex:0 0 240px;background:linear-gradient(180deg,var(--sidebar-bg),var(--sidebar-bg-2));
+  color:var(--sidebar-text);display:flex;flex-direction:column;padding:22px 14px;gap:26px;
+  position:sticky;top:0;height:100vh;overflow:hidden;
+  transition:width .22s ease,padding .22s ease,opacity .18s ease;
+}
+.app.collapsed .sidebar{width:0;flex-basis:0;padding-left:0;padding-right:0;opacity:0;border-right:none;}
+.sidebar>*{width:212px;}
+.menu-btn{background:var(--surface);border:1px solid var(--border);width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);cursor:pointer;box-shadow:var(--shadow);flex:none;}
+.menu-btn:hover{color:var(--text);}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px;}
+.brand-mark{width:34px;height:34px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:var(--accent-ink);font-weight:800;font-size:15px;font-family:'Manrope',sans-serif;flex:none;}
+.brand-name{font-family:'Manrope',sans-serif;font-weight:800;font-size:16.5px;color:#fff;letter-spacing:.2px;}
+.brand-sub{font-size:10.5px;color:var(--sidebar-text);letter-spacing:.06em;text-transform:uppercase;margin-top:1px;}
+
+.nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto;}
+.nav-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#565c6c;padding:14px 12px 6px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;font-size:13.5px;font-weight:500;color:var(--sidebar-text);cursor:pointer;border:1px solid transparent;transition:background .15s,color .15s;}
+.nav-item svg{flex:none;opacity:.85;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#fff;}
+.nav-item.active{background:var(--accent);color:var(--accent-ink);font-weight:700;}
+.nav-item.active svg{opacity:1;}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;}
+.nav-item.active .nav-badge{background:var(--accent-ink);color:var(--accent);}
+
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding-top:14px;display:flex;align-items:center;gap:10px;}
+.avatar{width:32px;height:32px;border-radius:9px;background:#232735;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;font-family:'Manrope',sans-serif;flex:none;}
+.sidebar-foot .who{line-height:1.25;flex:1;min-width:0;}
+.sidebar-foot .who b{display:block;color:#fff;font-size:12.5px;font-weight:600;}
+.sidebar-foot .who span{font-size:11px;color:#6b7284;}
+.icon-btn{background:none;border:none;color:#7b8194;cursor:pointer;padding:4px;display:flex;}
+.icon-btn:hover{color:#fff;}
+
+/* ---------- Main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:16px;padding:20px 28px 14px;border-bottom:1px solid transparent;}
+.topbar h1{font-size:21px;font-weight:800;}
+.topbar .crumb{font-size:12.5px;color:var(--text-faint);margin-top:2px;}
+.topbar-spacer{flex:1;}
+.pill-select{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);padding:7px 12px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;box-shadow:var(--shadow);}
+.bell{position:relative;background:var(--surface);border:1px solid var(--border);width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);cursor:pointer;box-shadow:var(--shadow);}
+.bell .dot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:1.5px solid var(--surface);}
+.top-avatar{width:36px;height:36px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;font-family:'Manrope',sans-serif;}
+
+.content{padding:6px 28px 40px;display:flex;flex-direction:column;gap:18px;}
+
+/* ---------- Stat tiles ---------- */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;}
+.stat-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.stat-trend{font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;white-space:nowrap;}
+.stat-trend.up{color:var(--success);background:var(--success-soft);}
+.stat-trend.down{color:var(--danger);background:var(--danger-soft);}
+.stat-label{font-size:12px;color:var(--text-muted);font-weight:600;}
+.stat-value{font-size:24px;font-weight:800;font-family:'Manrope',sans-serif;font-variant-numeric:tabular-nums;}
+.stat-value small{font-size:14px;color:var(--text-faint);font-weight:600;}
+
+/* ---------- generic panel ---------- */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;}
+.panel-head{display:flex;align-items:center;gap:10px;padding:16px 18px 4px;}
+.panel-head h2{font-size:15px;font-weight:800;}
+.panel-head .hint{font-size:11.5px;color:var(--text-faint);margin-top:2px;}
+.panel-head-spacer{flex:1;}
+.panel-body{padding:14px 18px 18px;}
+.link-btn{font-size:12px;font-weight:700;color:var(--accent-ink);background:var(--accent-soft);padding:5px 10px;border-radius:7px;border:none;cursor:pointer;}
+.tab-row{display:flex;gap:6px;background:var(--surface-alt);padding:3px;border-radius:8px;}
+.tab-row button{border:none;background:none;padding:5px 11px;font-size:12px;font-weight:700;color:var(--text-muted);border-radius:6px;cursor:pointer;}
+.tab-row button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow);}
+
+/* ---------- Grid layout rows ---------- */
+.row-a{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;align-items:stretch;}
+.row-b{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.row-c{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;}
+
+/* ---------- Parking layout grid ---------- */
+.zone-title{font-size:11.5px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.bay-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.bay{position:relative;aspect-ratio:1/0.82;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-weight:700;font-size:12.5px;
+  background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--border);cursor:default;overflow:hidden;}
+.bay .ico{opacity:.95;}
+.bay.free{border-top-color:var(--success);color:var(--success);}
+.bay.occupied{border-top-color:var(--danger);color:var(--danger);background:var(--danger-soft);}
+.bay.electric{border-top-color:var(--info);color:var(--info);}
+.bay.accessible{border-top-color:var(--accent);color:var(--accent-deep);}
+.bay.maintenance{border-top-color:var(--muted-spot);color:var(--text-muted);background:var(--muted-spot-soft);}
+.bay.broken{border-top-color:var(--danger);color:var(--danger);background:var(--danger-soft);}
+.bay.broken::after{content:"";position:absolute;inset:3px 0 0 0;background:repeating-linear-gradient(135deg,transparent,transparent 6px,rgba(229,72,77,.14) 6px,rgba(229,72,77,.14) 12px);pointer-events:none;}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-muted);font-weight:600;}
+.legend-dot{width:9px;height:9px;border-radius:3px;}
+
+/* ---------- Gate cards ---------- */
+.gate-card{border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface-alt);}
+.gate-card + .gate-card{margin-top:10px;}
+.gate-card-top{display:flex;align-items:center;justify-content:space-between;}
+.gate-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.gate-name .gdot{width:8px;height:8px;border-radius:50%;}
+.status-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;}
+.status-pill.open{background:var(--success-soft);color:var(--success);}
+.status-pill.closed{background:var(--danger-soft);color:var(--danger);}
+.status-pill.moving{background:var(--accent-soft);color:var(--accent-ink);animation:gatePulse 1s ease-in-out infinite;}
+.status-pill .livedot{display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:middle;}
+.status-pill.open .livedot{animation:gateBlink 2s ease-in-out infinite;}
+@keyframes gatePulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes gateBlink{0%,100%{opacity:.35}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.status-pill.moving{animation:none}.status-pill .livedot{animation:none}}
+.gate-actions{display:flex;gap:8px;}
+.btn{border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;font-weight:700;padding:7px 0;border-radius:8px;cursor:pointer;flex:1;transition:filter .1s;}
+.btn:hover{filter:brightness(1.05);}
+.btn.primary{background:var(--text);color:var(--surface);border-color:var(--text);}
+.btn.danger-o{color:var(--danger);border-color:var(--danger-soft);}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none;}
+.cycle-row{display:flex;align-items:center;gap:8px;}
+.cycle-track{flex:1;height:5px;border-radius:999px;background:var(--border);overflow:hidden;}
+.cycle-fill{height:100%;border-radius:999px;background:var(--info);transition:width .4s ease;}
+.cycle-fill.warn{background:var(--accent);}
+.cycle-label{font-size:10.5px;color:var(--text-faint);font-weight:600;white-space:nowrap;transition:color .2s;}
+.gate-card .last-action{font-size:10.5px;color:var(--text-faint);}
+
+/* ---------- Zone environment ---------- */
+.env-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.env-card{border:1px solid var(--border);border-radius:12px;padding:13px;background:var(--surface-alt);display:flex;flex-direction:column;gap:10px;}
+.env-top{display:flex;align-items:center;justify-content:space-between;}
+.env-zone{font-size:12.5px;font-weight:800;}
+.co-badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;font-variant-numeric:tabular-nums;}
+.co-ok{background:var(--success-soft);color:var(--success);}
+.co-warn{background:var(--danger-soft);color:var(--danger);}
+.co-track{height:6px;border-radius:999px;background:var(--border);overflow:hidden;}
+.co-fill{height:100%;border-radius:999px;}
+.env-toggles{display:flex;gap:8px;}
+.toggle-chip{flex:1;position:relative;display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:700;padding:6px 0;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-faint);cursor:pointer;transition:background .15s,color .15s,border-color .15s;}
+.toggle-chip.on{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-soft);}
+.toggle-chip .dotlive{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.5;transition:opacity .15s;}
+.toggle-chip.on .dotlive{opacity:1;animation:gateBlink 2s ease-in-out infinite;}
+.toggle-chip .auto-tag{font-size:8px;letter-spacing:.05em;text-transform:uppercase;opacity:.65;font-weight:800;}
+.night-toggle{display:flex;align-items:center;gap:8px;background:var(--surface-alt);border:1px solid var(--border);border-radius:999px;padding:4px 4px 4px 12px;font-size:11.5px;font-weight:700;color:var(--text-muted);}
+.night-switch{width:34px;height:19px;border-radius:999px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;flex:none;}
+.night-switch::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--surface);transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.night-switch.on{background:var(--accent);}
+.night-switch.on::after{left:17px;}
+
+/* ---------- Charts ---------- */
+.chart-row{display:flex;gap:20px;align-items:center;}
+.donut-wrap{flex:none;position:relative;width:132px;height:132px;}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.donut-center b{font-size:19px;font-weight:800;font-family:'Manrope',sans-serif;}
+.donut-center span{font-size:10px;color:var(--text-faint);font-weight:600;}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:9px;}
+.dl-row{display:flex;align-items:center;gap:8px;font-size:12px;}
+.dl-dot{width:9px;height:9px;border-radius:3px;flex:none;}
+.dl-name{flex:1;color:var(--text-muted);font-weight:600;}
+.dl-val{font-weight:800;font-variant-numeric:tabular-nums;}
+
+.bars{display:flex;align-items:flex-end;gap:9px;height:110px;padding-top:6px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+.bar{width:100%;border-radius:5px 5px 3px 3px;background:var(--accent);position:relative;}
+.bar.today{background:var(--text);}
+.bar-day{font-size:10px;color:var(--text-faint);font-weight:700;}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);font-weight:700;padding:0 10px 10px;border-bottom:1px solid var(--border);}
+td{padding:10px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.plate{font-weight:600;letter-spacing:.02em;}
+.ev-badge{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:6px;display:inline-block;}
+.ev-in{background:var(--info-soft);color:var(--info);}
+.ev-out{background:var(--success-soft);color:var(--success);}
+.ev-pay{background:var(--accent-soft);color:var(--accent-ink);}
+.td-muted{color:var(--text-faint);}
+
+/* ---------- Alerts feed ---------- */
+.alert-item{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);}
+.alert-item:last-child{border-bottom:none;padding-bottom:0;}
+.alert-ico{width:30px;height:30px;border-radius:8px;flex:none;display:flex;align-items:center;justify-content:center;}
+.alert-ico.crit{background:var(--danger-soft);color:var(--danger);}
+.alert-ico.warn{background:var(--accent-soft);color:var(--accent-ink);}
+.alert-ico.ok{background:var(--success-soft);color:var(--success);}
+.alert-ico.info{background:var(--info-soft);color:var(--info);}
+.alert-body{flex:1;min-width:0;}
+.alert-title{font-size:12.5px;font-weight:700;}
+.alert-sub{font-size:11.5px;color:var(--text-faint);margin-top:1px;}
+.alert-time{font-size:10.5px;color:var(--text-faint);white-space:nowrap;font-weight:600;}
+
+.section-title{display:flex;align-items:center;margin:4px 2px 0;}
+.section-title h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);font-weight:800;}
+
+@media (max-width:1180px){
+  .stats{grid-template-columns:repeat(3,1fr);}
+  .row-a,.row-b,.row-c{grid-template-columns:1fr;}
+  .env-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:760px){
+  .app:not(.collapsed) .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;width:212px;flex-basis:212px;padding:22px 14px;opacity:1;box-shadow:var(--shadow);}
+  .stats{grid-template-columns:1fr 1fr;}
+  .bay-grid{grid-template-columns:repeat(3,1fr);}
+  .env-grid{grid-template-columns:1fr;}
+  .content{padding:6px 14px 32px;}
+  .topbar{padding:16px 14px 10px;}
+}
+</style>
+
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">SP</div>
+      <div>
+        <div class="brand-name">SmartPark</div>
+        <div class="brand-sub">Operator console</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-label">Operate</div>
+      <div class="nav-item active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></svg>Parking spots</div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2-6h6l2 6h4M3 12v6h18v-6"/></svg>Gates &amp; barriers</div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Environment</div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 1 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-3 3-2-2 3-3z"/></svg>Manual control</div>
+
+      <div class="nav-label">Records</div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17h14M7 17V9l5-4 5 4v8"/></svg>Car records</div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>Payments</div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a1.8 1.8 0 0 0 1.5 2.7h17.4a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z"/></svg>Alerts &amp; maintenance<span class="nav-badge">2</span></div>
+      <div class="nav-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-8"/></svg>Reports</div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="avatar">OP</div>
+      <div class="who"><b>Dara Lim</b><span>Shift operator</span></div>
+      <button class="icon-btn" aria-label="Log out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Toggle sidebar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <div>
+        <h1>Dashboard</h1>
+        <div class="crumb">Facility overview · updated just now</div>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="pill-select">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/></svg>
+        All zones
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="bell"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot"></span></div>
+      <div class="top-avatar">OP</div>
+    </header>
+
+    <main class="content">
+
+      <!-- Stat tiles -->
+      <section class="stats">
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Cars inside</span><span class="stat-trend up">+4</span></div>
+          <div class="stat-value">16<small>&nbsp;vehicles</small></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Free spots</span><span class="stat-trend up">68%</span></div>
+          <div class="stat-value">34<small>&nbsp;/ 50</small></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Occupied spots</span><span class="stat-trend down">32%</span></div>
+          <div class="stat-value">16<small>&nbsp;/ 50</small></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Revenue today</span><span class="stat-trend up">+$86</span></div>
+          <div class="stat-value">$642</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><span class="stat-label">Active alerts</span><span class="stat-trend down">2 open</span></div>
+          <div class="stat-value">2</div>
+        </div>
+      </section>
+
+      <!-- Row A: parking layout + gates -->
+      <section class="row-a">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Parking layout</h2>
+              <div class="hint">Zone 1 · level 1 · tap a zone to switch</div>
+            </div>
+            <div class="panel-head-spacer"></div>
+            <div class="tab-row" id="zoneTabs">
+              <button class="active" data-zone="0">Zone 1</button>
+              <button data-zone="1">Zone 2</button>
+              <button data-zone="2">Zone 3</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="bay-grid" id="bayGrid"></div>
+            <div class="legend">
+              <div class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Free</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Occupied</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--info)"></span>Electric</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>Accessible</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--muted-spot)"></span>Maintenance</div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Broken</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Gate status</h2><div class="hint">Live — reflects open/close travel time</div></div>
+          <div class="panel-body">
+            <div class="gate-card" id="entryCard">
+              <div class="gate-card-top">
+                <div class="gate-name"><span class="gdot" style="background:var(--danger)"></span>Entry gate</div>
+                <span class="status-pill closed" id="entryPill"><span class="livedot"></span>Closed</span>
+              </div>
+              <div class="gate-actions">
+                <button class="btn primary" onclick="toggleGate('entry','open')">Open</button>
+                <button class="btn" onclick="toggleGate('entry','close')">Close</button>
+              </div>
+              <div class="cycle-row">
+                <div class="cycle-track"><div class="cycle-fill" style="width:41%"></div></div>
+                <span class="cycle-label">205/500 cycles</span>
+              </div>
+              <div class="last-action" id="entryLast">Last action: closed, 3m ago</div>
+            </div>
+            <div class="gate-card" id="exitCard">
+              <div class="gate-card-top">
+                <div class="gate-name"><span class="gdot" style="background:var(--success)"></span>Exit gate</div>
+                <span class="status-pill open" id="exitPill"><span class="livedot"></span>Open</span>
+              </div>
+              <div class="gate-actions">
+                <button class="btn" onclick="toggleGate('exit','open')">Open</button>
+                <button class="btn primary" onclick="toggleGate('exit','close')">Close</button>
+              </div>
+              <div class="cycle-row">
+                <div class="cycle-track"><div class="cycle-fill warn" style="width:87%"></div></div>
+                <span class="cycle-label">437/500 cycles</span>
+              </div>
+              <div class="last-action" id="exitLast">Last action: opened, 1m ago</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row B: zone environment -->
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Zone environment</h2>
+            <div class="hint">Carbon monoxide is live · fans auto-run above 50ppm · lights auto-run at night</div>
+          </div>
+          <div class="panel-head-spacer"></div>
+          <div class="night-toggle">Night mode<div class="night-switch" id="nightSwitch" onclick="toggleNight()"></div></div>
+        </div>
+        <div class="panel-body">
+          <div class="env-grid" id="envGrid"></div>
+        </div>
+      </section>
+
+      <!-- Row C: charts -->
+      <section class="row-b">
+        <div class="panel">
+          <div class="panel-head"><h2>Spot mix</h2><div class="hint">50 bays across 3 zones</div></div>
+          <div class="panel-body">
+            <div class="chart-row">
+              <div class="donut-wrap">
+                <svg width="132" height="132" viewBox="0 0 132 132">
+                  <circle cx="66" cy="66" r="52" fill="none" stroke="var(--border)" stroke-width="16"/>
+                  <circle cx="66" cy="66" r="52" fill="none" stroke="var(--success)" stroke-width="16" stroke-dasharray="326.7" stroke-dashoffset="0" stroke-dasharray="212.4 326.7" transform="rotate(-90 66 66)"/>
+                  <circle cx="66" cy="66" r="52" fill="none" stroke="var(--danger)" stroke-width="16" stroke-dasharray="52.3 326.7" stroke-dashoffset="-212.4" transform="rotate(-90 66 66)"/>
+                  <circle cx="66" cy="66" r="52" fill="none" stroke="var(--info)" stroke-width="16" stroke-dasharray="32.7 326.7" stroke-dashoffset="-264.7" transform="rotate(-90 66 66)"/>
+                  <circle cx="66" cy="66" r="52" fill="none" stroke="var(--accent)" stroke-width="16" stroke-dasharray="19.6 326.7" stroke-dashoffset="-297.4" transform="rotate(-90 66 66)"/>
+                  <circle cx="66" cy="66" r="52" fill="none" stroke="var(--muted-spot)" stroke-width="16" stroke-dasharray="9.8 326.7" stroke-dashoffset="-317" transform="rotate(-90 66 66)"/>
+                </svg>
+                <div class="donut-center"><b>50</b><span>total bays</span></div>
+              </div>
+              <div class="donut-legend">
+                <div class="dl-row"><span class="dl-dot" style="background:var(--success)"></span><span class="dl-name">Free</span><span class="dl-val">32</span></div>
+                <div class="dl-row"><span class="dl-dot" style="background:var(--danger)"></span><span class="dl-name">Occupied</span><span class="dl-val">8</span></div>
+                <div class="dl-row"><span class="dl-dot" style="background:var(--info)"></span><span class="dl-name">Electric</span><span class="dl-val">5</span></div>
+                <div class="dl-row"><span class="dl-dot" style="background:var(--accent)"></span><span class="dl-name">Accessible</span><span class="dl-val">3</span></div>
+                <div class="dl-row"><span class="dl-dot" style="background:var(--muted-spot)"></span><span class="dl-name">Maintenance</span><span class="dl-val">2</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Revenue, last 7 days</h2><div class="hint">Parking + electricity charging</div></div>
+          <div class="panel-body">
+            <div class="bars">
+              <div class="bar-col"><div class="bar" style="height:52%"></div><span class="bar-day">Mon</span></div>
+              <div class="bar-col"><div class="bar" style="height:68%"></div><span class="bar-day">Tue</span></div>
+              <div class="bar-col"><div class="bar" style="height:45%"></div><span class="bar-day">Wed</span></div>
+              <div class="bar-col"><div class="bar" style="height:80%"></div><span class="bar-day">Thu</span></div>
+              <div class="bar-col"><div class="bar" style="height:63%"></div><span class="bar-day">Fri</span></div>
+              <div class="bar-col"><div class="bar" style="height:91%"></div><span class="bar-day">Sat</span></div>
+              <div class="bar-col"><div class="bar today" style="height:72%"></div><span class="bar-day">Sun</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row D: activity + alerts -->
+      <section class="row-c">
+        <div class="panel">
+          <div class="panel-head"><h2>Recent car activity</h2><button class="link-btn">View all</button></div>
+          <div class="panel-body" style="padding-top:6px">
+            <table>
+              <thead><tr><th>Time</th><th>Plate</th><th>Type</th><th>Event</th><th>Details</th></tr></thead>
+              <tbody>
+                <tr><td class="td-muted">10:42</td><td class="mono plate">WBC 101</td><td>Electric</td><td><span class="ev-badge ev-in">Entry</span></td><td class="td-muted">Directed to S105</td></tr>
+                <tr><td class="td-muted">10:37</td><td class="mono plate">KLM 552</td><td>Any</td><td><span class="ev-badge ev-pay">Payment</span></td><td class="td-muted">$8.00 verified</td></tr>
+                <tr><td class="td-muted">10:31</td><td class="mono plate">KLM 552</td><td>Any</td><td><span class="ev-badge ev-out">Exit</span></td><td class="td-muted">Gate opened, 240 min</td></tr>
+                <tr><td class="td-muted">10:19</td><td class="mono plate">RGT 884</td><td>Accessible</td><td><span class="ev-badge ev-in">Entry</span></td><td class="td-muted">Directed to S111</td></tr>
+                <tr><td class="td-muted">10:05</td><td class="mono plate">ZXE 210</td><td>Any</td><td><span class="ev-badge ev-out">Exit</span></td><td class="td-muted">Penalty: overstay</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>Alerts &amp; maintenance</h2></div>
+          <div class="panel-body">
+            <div class="alert-item">
+              <div class="alert-ico crit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a1.8 1.8 0 0 0 1.5 2.7h17.4a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z"/></svg></div>
+              <div class="alert-body"><div class="alert-title">Spot S106 broken</div><div class="alert-sub">Zone 1 · sensor unresponsive, repair queued</div></div>
+              <div class="alert-time">6m ago</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-ico warn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14.7 6.3a4 4 0 1 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-3 3-2-2 3-3z"/></svg></div>
+              <div class="alert-body"><div class="alert-title">Exit gate nearing service cycle</div><div class="alert-sub">437/500 open-close cycles used</div></div>
+              <div class="alert-time">24m ago</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-ico ok"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <div class="alert-body"><div class="alert-title">Spot S111 repaired</div><div class="alert-sub">Zone 1 · maintenance completed</div></div>
+              <div class="alert-time">1h ago</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-ico info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg></div>
+              <div class="alert-body"><div class="alert-title">Payment flagged</div><div class="alert-sub">ZXE 210 · signature mismatch, penalty applied</div></div>
+              <div class="alert-time">2h ago</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+const zones = [
+  [ ['S101','free'],['S102','occupied'],['S103','free'],['S104','free'],['S105','electric'],['S106','maintenance'],
+    ['S107','free'],['S108','occupied'],['S109','free'],['S110','free'],['S111','accessible'],['S112','free'] ],
+  [ ['S201','occupied'],['S202','free'],['S203','free'],['S204','broken'],['S205','free'],['S206','electric'],
+    ['S207','occupied'],['S208','free'],['S209','accessible'],['S210','free'],['S211','free'],['S212','occupied'] ],
+  [ ['S301','free'],['S302','free'],['S303','electric'],['S304','free'],['S305','occupied'],['S306','free'],
+    ['S307','free'],['S308','accessible'],['S309','free'],['S310','maintenance'],['S311','free'],['S312','free'] ]
+];
+const icons = {
+  free:'<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
+  occupied:'<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l2-5h10l2 5"/><rect x="3" y="12" width="18" height="6" rx="1.5"/></svg>',
+  electric:'<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 3L4 14h6l-1 7 9-11h-6l1-7z"/></svg>',
+  accessible:'<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="4.5" r="1.6"/><path d="M6 20a5 5 0 0 1 8.9-3.1M9 8v4l3 1.5M9 12H6"/></svg>',
+  maintenance:'<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14.7 6.3a4 4 0 1 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 1 5.4-5.4l-3 3-2-2 3-3z"/></svg>',
+  broken:'<svg class="ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a1.8 1.8 0 0 0 1.5 2.7h17.4a1.8 1.8 0 0 0 1.5-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z"/></svg>'
+};
+function renderZone(i){
+  const grid = document.getElementById('bayGrid');
+  grid.innerHTML = zones[i].map(([name,status])=>
+    `<div class="bay ${status}">${icons[status]}<span>${name}</span></div>`
+  ).join('');
+}
+document.getElementById('zoneTabs').addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  document.querySelectorAll('#zoneTabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderZone(Number(btn.dataset.zone));
+});
+renderZone(0);
+
+/* ---------- Sidebar collapse ---------- */
+const appEl = document.getElementById('app');
+document.getElementById('menuBtn').addEventListener('click', ()=>{
+  appEl.classList.toggle('collapsed');
+});
+if(window.innerWidth <= 760) appEl.classList.add('collapsed');
+
+/* ---------- Gates: dynamic open/close with travel time ---------- */
+const gate = {
+  entry: { state:'closed', cycles:205, busy:false },
+  exit:  { state:'open',   cycles:437, busy:false },
+};
+const CYCLE_MAX = 500;
+const pillMarkup = { open:'Open', closed:'Closed', opening:'Opening…', closing:'Closing…' };
+
+function paintGate(which){
+  const g = gate[which];
+  const pill = document.getElementById(which+'Pill');
+  const label = pillMarkup[g.state];
+  pill.innerHTML = '<span class="livedot"></span>' + label;
+  pill.className = 'status-pill ' + (g.state === 'opening' || g.state === 'closing' ? 'moving' : g.state);
+  const card = document.getElementById(which+'Card');
+  card.querySelectorAll('.btn').forEach(b => b.disabled = g.busy);
+  const pct = Math.round(g.cycles / CYCLE_MAX * 100);
+  card.querySelector('.cycle-fill').style.width = pct + '%';
+  card.querySelector('.cycle-fill').classList.toggle('warn', pct >= 80);
+  card.querySelector('.cycle-label').textContent = g.cycles + '/' + CYCLE_MAX + ' cycles';
+}
+function toggleGate(which, action){
+  const g = gate[which];
+  if(g.busy || g.state === action) return;
+  g.busy = true;
+  g.state = action === 'open' ? 'opening' : 'closing';
+  paintGate(which);
+  setTimeout(()=>{
+    g.state = action;
+    g.busy = false;
+    g.cycles = Math.min(CYCLE_MAX, g.cycles + 1);
+    paintGate(which);
+    document.getElementById(which+'Last').textContent = 'Last action: ' + (action === 'open' ? 'opened' : 'closed') + ', just now';
+  }, 1200);
+}
+paintGate('entry');
+paintGate('exit');
+
+/* ---------- Zone environment: live CO, auto fan/light rules ---------- */
+let isNight = false;
+const CO_FAN_THRESHOLD = 50;
+const envZones = [
+  { name:'Zone 1', co:38, fanMode:'auto', lightMode:'auto' },
+  { name:'Zone 2', co:64, fanMode:'auto', lightMode:'auto' },
+  { name:'Zone 3', co:21, fanMode:'auto', lightMode:'auto' },
+];
+function effectiveOn(mode, autoValue){
+  if(mode === 'auto') return autoValue;
+  return mode === 'on';
+}
+function cycleMode(mode){
+  return mode === 'auto' ? 'on' : mode === 'on' ? 'off' : 'auto';
+}
+function renderEnv(){
+  const grid = document.getElementById('envGrid');
+  grid.innerHTML = envZones.map((z,i)=>{
+    const warn = z.co >= CO_FAN_THRESHOLD;
+    const fanOn = effectiveOn(z.fanMode, warn);
+    const lightOn = effectiveOn(z.lightMode, isNight);
+    return `<div class="env-card">
+      <div class="env-top"><span class="env-zone">${z.name}</span><span class="co-badge ${warn?'co-warn':'co-ok'}">${z.co} ppm</span></div>
+      <div class="co-track"><div class="co-fill" style="width:${Math.min(z.co,100)}%;background:${warn?'var(--danger)':'var(--success)'}"></div></div>
+      <div class="env-toggles">
+        <div class="toggle-chip ${fanOn?'on':''}" onclick="cycleEnv(${i},'fan')"><span class="dotlive"></span>Fan${z.fanMode==='auto'?'<span class="auto-tag">auto</span>':''}</div>
+        <div class="toggle-chip ${lightOn?'on':''}" onclick="cycleEnv(${i},'light')"><span class="dotlive"></span>Lights${z.lightMode==='auto'?'<span class="auto-tag">auto</span>':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function cycleEnv(i, which){
+  const z = envZones[i];
+  if(which === 'fan') z.fanMode = cycleMode(z.fanMode);
+  else z.lightMode = cycleMode(z.lightMode);
+  renderEnv();
+}
+function toggleNight(){
+  isNight = !isNight;
+  document.getElementById('nightSwitch').classList.toggle('on', isNight);
+  renderEnv();
+}
+renderEnv();
+setInterval(()=>{
+  envZones.forEach(z=>{
+    const drift = Math.round((Math.random()-0.45) * 9);
+    z.co = Math.max(6, Math.min(96, z.co + drift));
+  });
+  renderEnv();
+}, 3500);
+</script>
