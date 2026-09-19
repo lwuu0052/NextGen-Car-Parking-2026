@@ -109,8 +109,7 @@ export class AllocationService {
       const isOccupied =
         detectedCars > 0 ||
         occupancyStatus === 'occupied' ||
-        occupancyStatus === 'reserved' ||
-        Boolean(s.lastCarPlate);
+        occupancyStatus === 'reserved';
       if (isOccupied) return false;
 
       // Exclude in-flight reserved spots

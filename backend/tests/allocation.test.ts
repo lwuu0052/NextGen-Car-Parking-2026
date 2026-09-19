@@ -60,6 +60,26 @@ describe('AllocationService Unit Tests', () => {
     expect(result?.Name).toBe('EV_CLOSE');
   });
 
+  it('should not treat lastCarPlate alone as occupied when simulator reports a spot free', async () => {
+    allocationService.clearAllReservations();
+    vi.spyOn(simulatorClient, 'listParkingSpots').mockResolvedValue([
+      { Name: 'ENTRY1', Purpose: 'EntrySpot', CarType: 'Any', X: 100, Y: 100 } as any,
+      {
+        Name: 'RECENTLY_USED',
+        Purpose: 'Park',
+        CarType: 'Any',
+        OccupancyStatus: 'Free',
+        lastCarPlate: 'OLD-123',
+        X: 120,
+        Y: 120,
+      } as any,
+    ]);
+
+    const result = await allocationService.allocateSpotForEntry('NEW-999', 'Normal', 'ENTRY1');
+    expect(result).not.toBeNull();
+    expect(result?.Name).toBe('RECENTLY_USED');
+  });
+
   it('should filter out entry/exit, occupied, and repair requested spots', async () => {
     const restrictedSpots: SimulatorParkingSpotDto[] = [
       { Name: 'ENTRY1', SpotType: 'Entry', OccupancyStatus: 'Occupied', IsRepairRequested: false } as any,

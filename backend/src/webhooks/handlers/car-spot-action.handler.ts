@@ -76,8 +76,6 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
               console.error(`[Auto Gate Control] Error opening ${entryGateName}:`, err.message);
             }
 
-            await simulatorClient.waitForGateState(entryGateName, 'Open', 1200, 100);
-
             // Dispatch car to spot
             let dispatchResult = await simulatorClient.sendCarToSpot(carPlate, allocatedSpot.Name);
             console.log(`[Auto Allocation] Car dispatch result:`, dispatchResult);
@@ -106,6 +104,9 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
               setTimeout(async () => {
                 await simulatorClient.sendCarToSpot(carPlate, finalSpotName).catch(() => {});
               }, 300);
+              setTimeout(async () => {
+                await simulatorClient.sendCarToSpot(carPlate, finalSpotName).catch(() => {});
+              }, 1000);
             } else {
               console.warn(`[Auto Allocation] Failed to dispatch "${carPlate}" to any currently available spot.`);
               allocationService.releaseReservationForCar(carPlate);
