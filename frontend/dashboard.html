@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SmartPark Dashboard</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+
+    <div class="brand">
+
+      <h1>SmartPark</h1>
+
+      <span></span>
+
+      <p>Car Park Management System</p>
+
+    </div>
+
+
+    <div class="dashboard-user">
+
+      <span>Operator</span>
+
+      <a href="index.html">
+        Logout
+      </a>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- MAIN DASHBOARD -->
+  <main class="dashboard-container">
+
+
+    <!-- PAGE TITLE -->
+    <div class="dashboard-title">
+
+      <div>
+        <h2>Dashboard</h2>
+
+        <p>
+          Current car park status
+        </p>
+      </div>
+
+    </div>
+
+
+
+    <!-- SUMMARY CARDS -->
+
+    <section class="summary-grid">
+
+      <div class="summary-card">
+
+        <p>Cars Inside</p>
+
+        <h3>16</h3>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <p>Free Spots</p>
+
+        <h3>20</h3>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <p>Occupied Spots</p>
+
+        <h3>16</h3>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <p>Active Alerts</p>
+
+        <h3>2</h3>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- MAIN CONTENT -->
+
+    <section class="dashboard-grid">
+
+
+      <!-- PARKING SPOTS -->
+
+      <div class="dashboard-box">
+
+        <div class="box-header">
+
+          <h3>Parking Spots</h3>
+
+          <span>Zone 1</span>
+
+        </div>
+
+
+        <div class="parking-list">
+
+
+          <div class="parking-row">
+
+            <div>
+
+              <strong>S101</strong>
+
+              <small>Any</small>
+
+            </div>
+
+            <span class="status free">
+              Free
+            </span>
+
+          </div>
+
+
+
+          <div class="parking-row">
+
+            <div>
+
+              <strong>S102</strong>
+
+              <small>Electric</small>
+
+            </div>
+
+            <span class="status occupied">
+              Occupied
+            </span>
+
+          </div>
+
+
+
+          <div class="parking-row">
+
+            <div>
+
+              <strong>S103</strong>
+
+              <small>Accessible</small>
+
+            </div>
+
+            <span class="status free">
+              Free
+            </span>
+
+          </div>
+
+
+
+          <div class="parking-row">
+
+            <div>
+
+              <strong>S104</strong>
+
+              <small>Any</small>
+
+            </div>
+
+            <span class="status occupied">
+              Occupied
+            </span>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+
+      <!-- GATE STATUS -->
+
+      <div class="dashboard-box">
+
+        <div class="box-header">
+
+          <h3>Gate Status</h3>
+
+        </div>
+
+
+        <div class="gate-row">
+
+          <div>
+
+            <strong>Entry Gate</strong>
+
+            <p>Gate 1</p>
+
+          </div>
+
+          <span class="status open">
+            Open
+          </span>
+
+        </div>
+
+
+
+        <div class="gate-row">
+
+          <div>
+
+            <strong>Exit Gate</strong>
+
+            <p>Gate 2</p>
+
+          </div>
+
+          <span class="status closed">
+            Closed
+          </span>
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- RECENT CARS -->
+
+      <div class="dashboard-box large-box">
+
+        <div class="box-header">
+
+          <h3>Recent Car Activity</h3>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>Plate Number</th>
+
+                <th>Type</th>
+
+                <th>Event</th>
+
+                <th>Parking Spot</th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr>
+
+                <td>ABC123</td>
+
+                <td>Normal</td>
+
+                <td>Parked</td>
+
+                <td>S102</td>
+
+              </tr>
+
+
+              <tr>
+
+                <td>EV888</td>
+
+                <td>Electric</td>
+
+                <td>Entered</td>
+
+                <td>-</td>
+
+              </tr>
+
+
+              <tr>
+
+                <td>XYZ111</td>
+
+                <td>Normal</td>
+
+                <td>Exited</td>
+
+                <td>-</td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ALERTS -->
+
+      <div class="dashboard-box">
+
+        <div class="box-header">
+
+          <h3>Alerts</h3>
+
+        </div>
+
+
+        <div class="alert-item">
+
+          <strong>Gate 1</strong>
+
+          <span class="status warning">
+            Maintenance
+          </span>
+
+        </div>
+
+
+        <div class="alert-item">
+
+          <strong>S106</strong>
+
+          <span class="status broken">
+            Broken
+          </span>
+
+        </div>
+
+
+      </div>
+
+
+    </section>
+
+  </main>
+
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    © 2026 SmartPark. All rights reserved.
+
+  </footer>
+
+
+</body>
+
+</html>

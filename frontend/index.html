@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartPark Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <h1>SmartPark</h1>
+      <span></span>
+      <p>Car Park Management System</p>
+    </div>
+    <p class="tagline">Safer Parking, Smarter Tomorrow</p>
+  </header>
+
+  <main class="main-container">
+    <div class="login-card">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Log in to access the car park management system</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter your username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="password-container">
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="button" id="togglePassword" class="password-toggle" aria-label="Show or hide password">👁</button>
+          </div>
+        </div>
+
+        <p id="errorMessage" class="error-message"></p>
+        <button type="submit" class="login-button">Login</button>
+      </form>
+
+      <p class="create-account">
+        Don't have an account?
+        <a href="create-account.html">Create account</a>
+      </p>
+    </div>
+  </main>
+
+  <footer>© 2026 SmartPark. All rights reserved.</footer>
+  <script src="script.js"></script>
+</body>
+</html>
