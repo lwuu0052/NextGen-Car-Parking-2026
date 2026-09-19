@@ -4,6 +4,7 @@ import { simulatorClient } from '../simulator/client/simulator-client.js';
 import { billingService } from './billing.service.js';
 import { sessionService } from './session.service.js';
 
+
 interface ExitQueueItem {
   carPlate: string;
   enqueuedAt: number;
