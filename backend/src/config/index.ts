@@ -37,6 +37,11 @@ const configSchema = z.object({
     (val) => val === 'true' || val === true,
     z.boolean()
   ).default(false),
+
+  AUTO_OPEN_GATE_ON_ARRIVAL: z.preprocess(
+    (val) => val === 'true' || val === true || val === undefined,
+    z.boolean()
+  ).default(true),
 });
 
 export type Config = z.infer<typeof configSchema>;
