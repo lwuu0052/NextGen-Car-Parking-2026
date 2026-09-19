@@ -15,18 +15,28 @@ export class EventDispatcher {
   public async dispatch(payload: BaseWebhookEventPayload): Promise<DispatchResult> {
     const externalEventId = payload.EventId || null;
     const eventClass = payload.EventClass;
+    let record: WebhookEventRecord | null = null;
+    let isDuplicate = false;
 
-    // 1. Persist raw event to database BEFORE processing
-    const { record, isDuplicate } = await webhookEventRepository.createEvent({
-      external_event_id: externalEventId,
-      event_type: eventClass,
-      payload: payload,
-      occurred_at: payload.ServerDateTime ? new Date(payload.ServerDateTime) : null,
-    });
+    // 1. Persist raw event to database (with fallback for offline DB during dev)
+    try {
+      const res = await webhookEventRepository.createEvent({
+        external_event_id: externalEventId,
+        event_type: eventClass,
+        payload: payload,
+        occurred_at: payload.ServerDateTime ? new Date(payload.ServerDateTime) : null,
+      });
+      record = res.record;
+      isDuplicate = res.isDuplicate;
+    } catch (dbErr: any) {
+      console.warn(
+        `[EventDispatcher] Database write skipped (${dbErr.message}). Dispatching event in memory...`
+      );
+    }
 
-    if (isDuplicate) {
+    if (isDuplicate && record) {
       console.log(
-        `[EventDispatcher] Duplicate event ID "${externalEventId}" ignored for business processing.`
+        `[EventDispatcher] Duplicate event ID "${externalEventId}" ignored.`
       );
       return {
         savedEventId: record.id,
@@ -38,13 +48,15 @@ export class EventDispatcher {
       };
     }
 
-    // 2. Dispatch to appropriate handler
+    // 2. Dispatch event to handler
     const handler = getEventHandler(eventClass);
     try {
       await handler(payload);
-      await webhookEventRepository.updateStatus(record.id, 'processed');
+      if (record) {
+        await webhookEventRepository.updateStatus(record.id, 'processed').catch(() => {});
+      }
       return {
-        savedEventId: record.id,
+        savedEventId: record ? record.id : 0,
         externalEventId,
         eventClass,
         isDuplicate: false,
@@ -53,12 +65,14 @@ export class EventDispatcher {
     } catch (handlerErr: any) {
       const errorMsg = handlerErr.message || String(handlerErr);
       console.error(
-        `[EventDispatcher] Error processing event ID ${record.id} (${eventClass}):`,
+        `[EventDispatcher] Error processing event (${eventClass}):`,
         errorMsg
       );
-      await webhookEventRepository.updateStatus(record.id, 'failed', errorMsg);
+      if (record) {
+        await webhookEventRepository.updateStatus(record.id, 'failed', errorMsg).catch(() => {});
+      }
       return {
-        savedEventId: record.id,
+        savedEventId: record ? record.id : 0,
         externalEventId,
         eventClass,
         isDuplicate: false,

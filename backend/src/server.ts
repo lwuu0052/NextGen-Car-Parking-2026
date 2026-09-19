@@ -5,12 +5,22 @@ import { db } from './database/postgres.js';
 
 const app = createApp();
 
-const server = app.listen(config.APP_PORT, config.APP_HOST, () => {
+const server = app.listen(config.APP_PORT, config.APP_HOST, async () => {
   logger.info(
     `[Server] Parking Management Backend started on http://${config.APP_HOST}:${config.APP_PORT} in ${config.APP_ENV} mode`
   );
   logger.info(`[Server] Simulator Base URL configured as ${config.SIMULATOR_BASE_URL}`);
+
+  // Proactively open entrance & exit barriers on startup
+  try {
+    const { simulatorClient } = await import('./simulator/client/simulator-client.js');
+    await simulatorClient.openGate('gateA').catch(() => {});
+    await simulatorClient.openGate('gateB').catch(() => {});
+  } catch {
+    // Ignore initial connection errors
+  }
 });
+
 
 async function gracefulShutdown(signal: string): Promise<void> {
   logger.info(`[Server] Received ${signal}. Starting graceful shutdown...`);

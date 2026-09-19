@@ -21,5 +21,18 @@ export const eventHandlerMap: Record<string, EventHandlerFunction> = {
 };
 
 export function getEventHandler(eventClass: string): EventHandlerFunction {
-  return eventHandlerMap[eventClass] || handleUnknownEvent;
+  if (!eventClass) return handleUnknownEvent;
+  
+  // Direct lookup first
+  if (eventHandlerMap[eventClass]) {
+    return eventHandlerMap[eventClass];
+  }
+
+  // Convert PascalCase/camelCase (e.g. CarSpotAction -> car_spot_action)
+  const snakeCase = eventClass
+    .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+    .toLowerCase();
+
+  return eventHandlerMap[snakeCase] || handleUnknownEvent;
 }
+

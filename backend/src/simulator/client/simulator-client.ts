@@ -66,6 +66,39 @@ export class SimulatorClient {
     return this.requestWithRetry<SimulatorExhaustFanDto[]>('GET', '/api/v1/list-exhaust-fans', true);
   }
 
+  // --- Car Navigation & Spot Dispatch ---
+  public async sendCarToSpot(carName: string, spotName: string): Promise<{ success: boolean; message: string }> {
+    const path = `/api/v1/car/${encodeURIComponent(carName)}/goto/${encodeURIComponent(spotName)}`;
+    try {
+      await this.rawRequest('POST', path, undefined, true);
+      return { success: true, message: `Car ${carName} dispatched to spot ${spotName}` };
+    } catch (err: any) {
+      return { success: false, message: `Failed to dispatch car ${carName} to ${spotName}: ${err.message}` };
+    }
+  }
+
+  public async chargeCar(
+    carName: string,
+    parkingCost: number,
+    chargingCost: number
+  ): Promise<{ success: boolean; message: string }> {
+    const params = new URLSearchParams({
+      parkingCost: String(parkingCost),
+      chargingCost: String(chargingCost),
+    });
+    const path = `/api/v1/car/${encodeURIComponent(carName)}/charge?${params.toString()}`;
+
+    try {
+      await this.rawRequest('POST', path, undefined, true);
+      return {
+        success: true,
+        message: `Payment requested from car ${carName} for parking=${parkingCost}, charging=${chargingCost}`,
+      };
+    } catch (err: any) {
+      return { success: false, message: `Failed to charge car ${carName}: ${err.message}` };
+    }
+  }
+
   // --- Gate Control Commands (State-Mutating POSTs - NEVER Blindly Retry) ---
   public async openGate(gateName: string): Promise<GateActionResult> {
     return this.executeGateControl(gateName, 'open', 'Open');
@@ -98,7 +131,6 @@ export class SimulatorClient {
     const path = `/api/v1/barrier-gates/${encodeURIComponent(gateName)}/${action}`;
 
     try {
-      // Control commands NEVER retry automatically on timeout or error
       const response = await this.rawRequest<SimulatorGateCommandResponse>('POST', path, undefined, true);
       return {
         accepted: true,
@@ -108,7 +140,6 @@ export class SimulatorClient {
       };
     } catch (err: any) {
       if (err instanceof SimulatorTimeoutError) {
-        // Control timed out: Query current state to check if command took effect
         try {
           const barriers = await this.listBarriers();
           const gate = barriers.find((b) => b.Name === gateName);
@@ -121,7 +152,7 @@ export class SimulatorClient {
             };
           }
         } catch {
-          // Status query also failed
+          // Status query failed
         }
 
         return {
@@ -150,14 +181,12 @@ export class SimulatorClient {
       } catch (err: any) {
         lastError = err;
 
-        // Do not retry auth errors or non-retriable 4xx errors
         if (err instanceof SimulatorAuthError || (err instanceof SimulatorResponseError && err.statusCode >= 400 && err.statusCode < 500)) {
           throw err;
         }
 
         attempt++;
         if (attempt <= maxRetries) {
-          // Exponential backoff: 200ms, 400ms
           await new Promise((resolve) => setTimeout(resolve, attempt * 200));
         }
       }
@@ -195,7 +224,6 @@ export class SimulatorClient {
       });
 
       if (response.status === 401 && requiresAuth && !isRetryForAuth) {
-        // Token might have expired or invalidated; clear token and retry ONCE
         tokenManager.invalidateToken();
         return this.rawRequest<T>(method, path, body, requiresAuth, true);
       }
