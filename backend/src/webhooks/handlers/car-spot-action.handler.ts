@@ -6,6 +6,7 @@ import { simulatorClient } from '../../simulator/client/simulator-client.js';
 import { allocationService } from '../../services/allocation.service.js';
 import { sessionService } from '../../services/session.service.js';
 import { billingService } from '../../services/billing.service.js';
+import { exitQueueService } from '../../services/exit-queue.service.js';
 import { config } from '../../config/index.js';
 
 
@@ -140,60 +141,12 @@ export async function handleCarSpotAction(event: CarSpotActionEventPayload): Pro
   if (isExitSpot && carPlate) {
     if (!isCarIn) {
       console.log(
-        `[Auto Exit Control] Ignoring non-arrival exit event for "${carPlate}" at ${spotName} (${rawDirection}).`
+        `[Auto Exit Control] Treating exit event for "${carPlate}" at ${spotName} (${rawDirection}) as exit arrival.`
       );
-      return;
     }
 
-    console.log(
-      `[Auto Exit Control] Vehicle "${carPlate}" arrived at exit spot (${spotName}). Requesting simulator payment...`
-    );
-
-    try {
-      const activeSession = await sessionRepository.findActiveSessionByPlate(carPlate).catch(() => null);
-      if (activeSession) {
-        if (activeSession.status !== 'ready_to_exit' && activeSession.status !== 'awaiting_payment') {
-          console.log(
-            `[Auto Exit Control] Ignoring exit spot pass-through for "${carPlate}" while status is "${activeSession.status}".`
-          );
-          return;
-        }
-
-        if (activeSession.status === 'awaiting_payment') {
-          console.log(`[Auto Exit Control] Payment already requested for "${carPlate}". Skipping duplicate charge.`);
-          return;
-        }
-
-        const existingInvoice = await invoiceRepository.findInvoiceByPlateNumber(carPlate).catch(() => null);
-        if (existingInvoice?.status === 'paid') {
-          console.log(`[Auto Exit Control] "${carPlate}" already paid. Dispatching to leave point.`);
-          await simulatorClient.openGate('gateB').catch(() => {});
-          await new Promise((resolve) => setTimeout(resolve, 350));
-          const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1');
-          console.log(`[Auto Exit Control] Paid car dispatch result for "${carPlate}":`, dispatchResult);
-          return;
-        }
-
-        const charge = await billingService.generateSimulatorChargeInvoice(activeSession);
-        if (charge.invoice.status !== 'paid') {
-          console.log(
-            `[Auto Billing] Generated invoice #${charge.invoice.id} for Car "${carPlate}". ` +
-              `Requesting simulator charge: parking=${charge.parkingCost}, charging=${charge.chargingCost}, ` +
-              `total=${charge.totalCost} (${charge.billableMinutes} min).`
-          );
-          const chargeResult = await simulatorClient.chargeCar(
-            carPlate,
-            charge.parkingCost,
-            charge.chargingCost
-          );
-          console.log(`[Auto Billing] Simulator charge result for "${carPlate}":`, chargeResult);
-        }
-      } else {
-        console.warn(`[Auto Exit Control] No active session found for "${carPlate}". Payment request skipped.`);
-      }
-    } catch (err: any) {
-      console.warn(`[Auto Exit Control] Payment request failed for ${carPlate}:`, err.message);
-    }
+    console.log(`[Auto Exit Control] Vehicle "${carPlate}" arrived at exit spot (${spotName}). Enqueuing for FIFO exit.`);
+    exitQueueService.enqueue(carPlate);
 
     return;
   }

@@ -14,6 +14,10 @@ export interface PaymentProcessingResult {
   attempt?: PaymentAttemptRecord | null;
 }
 
+export interface PaymentProcessingOptions {
+  dispatchOnSuccess?: boolean;
+}
+
 export interface SimulatorChargeInvoice {
   invoice: InvoiceRecord;
   billableMinutes: number;
@@ -87,7 +91,11 @@ export class BillingService {
    * Processes an incoming payment webhook event using PostgreSQL Transaction + Row-Level Locking (FOR UPDATE).
    * Verifies payment amounts against anti-fraud rules and prevents double-crediting on race conditions.
    */
-  public async processPaymentEvent(event: PaymentMadeEventPayload): Promise<PaymentProcessingResult> {
+  public async processPaymentEvent(
+    event: PaymentMadeEventPayload,
+    options: PaymentProcessingOptions = {}
+  ): Promise<PaymentProcessingResult> {
+    const dispatchOnSuccess = options.dispatchOnSuccess ?? true;
     const carPlate = event.CarPlateNumber || (event as any).PlateNumber || (event as any).CarPlate;
     const reportedAmount = Number(event.Amount) || 0;
     const externalPaymentId = event.EventId || (event as any).PaymentId || null;
@@ -202,8 +210,9 @@ export class BillingService {
         `[BillingService Success] Payment verified for Car "${carPlate}". Invoice #${targetInvoice.id} paid. Session ready to exit!`
       );
 
-      // 6. Trigger Exit Gate Opening & Vehicle Guidance
-      this.triggerExitGateAndDispatch(carPlate);
+      if (dispatchOnSuccess) {
+        this.triggerExitGateAndDispatch(carPlate);
+      }
 
       return {
         success: true,
@@ -229,12 +238,26 @@ export class BillingService {
       try {
         console.log(`[BillingService Auto Gate] Opening gateB for paid car "${carPlate}"...`);
         await simulatorClient.openGate('gateB').catch(() => {});
-        await new Promise((resolve) => setTimeout(resolve, 350));
-        const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1');
-        console.log(`[BillingService Auto Gate] Dispatching paid car "${carPlate}" to ESCAPE1:`, dispatchResult);
+        const opened = await simulatorClient.waitForGateState('gateB', 'Open', 3000);
+        if (!opened) {
+          console.warn(`[BillingService Auto Gate] gateB did not report Open before dispatching "${carPlate}".`);
+        }
+        const dispatchResult = await simulatorClient.sendCarToSpot(carPlate, 'leavepark');
+        console.log(`[BillingService Auto Gate] Dispatching paid car "${carPlate}" to leavepark:`, dispatchResult);
+        if (dispatchResult.success) {
+          await sessionRepository.findActiveSessionByPlate(carPlate)
+            .then((session) => session ? sessionRepository.updateStatus(session.id, 'departed', {
+              departed_at: new Date(),
+              parking_duration_seconds: Math.max(
+                0,
+                Math.floor((Date.now() - new Date(session.arrived_at).getTime()) / 1000)
+              ),
+            }) : null)
+            .catch(() => null);
+        }
         setTimeout(async () => {
-          await simulatorClient.sendCarToSpot(carPlate, 'ESCAPE1').catch(() => {});
-        }, 300);
+          await simulatorClient.sendCarToSpot(carPlate, 'leavepark').catch(() => {});
+        }, 1000);
       } catch (err: any) {
         console.error(`[BillingService Auto Gate] Error dispatching paid car "${carPlate}":`, err.message);
       }

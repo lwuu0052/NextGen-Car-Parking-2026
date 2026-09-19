@@ -108,6 +108,31 @@ export class SimulatorClient {
     return this.executeGateControl(gateName, 'close', 'Closed');
   }
 
+  public async waitForGateState(
+    gateName: string,
+    expectedState: string,
+    timeoutMs = 3000,
+    intervalMs = 200
+  ): Promise<boolean> {
+    const deadline = Date.now() + timeoutMs;
+
+    while (Date.now() <= deadline) {
+      try {
+        const barriers = await this.listBarriers();
+        const gate = barriers.find((b) => b.Name === gateName);
+        if (gate?.State === expectedState) {
+          return true;
+        }
+      } catch {
+        // Keep polling until timeout; callers already handle a false result.
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+
+    return false;
+  }
+
   public async repairGate(gateName: string): Promise<GateActionResult> {
     return this.executeGateControl(gateName, 'repair', 'Closed');
   }

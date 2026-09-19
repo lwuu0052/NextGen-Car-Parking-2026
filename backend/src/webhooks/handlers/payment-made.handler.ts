@@ -5,7 +5,7 @@ export async function handlePaymentMade(event: PaymentMadeEventPayload): Promise
   const carPlate = event.CarPlateNumber || (event as any).PlateNumber || (event as any).CarPlate;
   console.log(`[Webhook Handler] PaymentMade: Car "${carPlate || 'unknown'}" paid amount ${event.Amount}`);
 
-  const result = await billingService.processPaymentEvent(event);
+  const result = await billingService.processPaymentEvent(event, { dispatchOnSuccess: false });
   if (!result.success) {
     console.warn(`[Webhook Handler] PaymentMade processing failed for Car "${carPlate}": ${result.reason}`);
   }
