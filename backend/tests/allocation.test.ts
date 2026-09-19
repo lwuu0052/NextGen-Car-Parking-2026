@@ -46,6 +46,20 @@ describe('AllocationService Unit Tests', () => {
     expect(result?.Name).toBe('SPOT_NOR_CLOSE');
   });
 
+  it('should use simulator CarType and entry coordinates when ranking available spots', async () => {
+    allocationService.clearAllReservations();
+    vi.spyOn(simulatorClient, 'listParkingSpots').mockResolvedValue([
+      { Name: 'ENTRY1', Purpose: 'EntrySpot', CarType: 'Any', X: 100, Y: 100 } as any,
+      { Name: 'EV_FAR', Purpose: 'Park', CarType: 'Electric', X: 900, Y: 900 } as any,
+      { Name: 'EV_CLOSE', Purpose: 'Park', CarType: 'Electric', X: 120, Y: 120 } as any,
+      { Name: 'ANY_CLOSEST', Purpose: 'Park', CarType: 'Any', X: 105, Y: 105 } as any,
+    ]);
+
+    const result = await allocationService.allocateSpotForEntry('EV-456', 'Electric', 'ENTRY1');
+    expect(result).not.toBeNull();
+    expect(result?.Name).toBe('EV_CLOSE');
+  });
+
   it('should filter out entry/exit, occupied, and repair requested spots', async () => {
     const restrictedSpots: SimulatorParkingSpotDto[] = [
       { Name: 'ENTRY1', SpotType: 'Entry', OccupancyStatus: 'Occupied', IsRepairRequested: false } as any,

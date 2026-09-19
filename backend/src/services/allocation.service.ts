@@ -15,7 +15,7 @@ export interface ReservedSpotEntry {
 
 export class AllocationService {
   private pendingReservations: Map<string, ReservedSpotEntry> = new Map();
-  private readonly reservationTTLMs = 180_000; // 3 minutes TTL
+  private readonly reservationTTLMs = 45_000;
 
   /**
    * Recommends and allocates the optimal parking spot based on car type and distance.
@@ -23,12 +23,67 @@ export class AllocationService {
   public async allocateSpot(
     carPlate: string,
     carType: string,
-    entryCoords: { x: number; y: number } = { x: 300, y: 900 }
+    entryCoords: { x: number; y: number } = { x: 300, y: 900 },
+    excludedSpotNames: Set<string> = new Set()
+  ): Promise<SimulatorParkingSpotDto | null> {
+    const candidates = await this.getSpotCandidates(carPlate, carType, entryCoords, excludedSpotNames);
+    const chosenSpot = candidates[0]?.spot || null;
+
+    if (chosenSpot?.Name) {
+      this.reserveSpot(chosenSpot.Name, carPlate);
+    }
+
+    return chosenSpot;
+  }
+
+  public async allocateSpotForEntry(
+    carPlate: string,
+    carType: string,
+    entrySpotName: string,
+    excludedSpotNames: Set<string> = new Set()
   ): Promise<SimulatorParkingSpotDto | null> {
     this.cleanExpiredReservations();
 
     const allSpots = await simulatorClient.listParkingSpots();
+    const entrySpot = allSpots.find((spot: any) => {
+      const name = spot.Name || spot.name;
+      return name === entrySpotName;
+    }) as any;
 
+    const entryCoords = {
+      x: Number(entrySpot?.X ?? entrySpot?.x ?? 300),
+      y: Number(entrySpot?.Y ?? entrySpot?.y ?? 900),
+    };
+
+    const candidates = this.buildSpotCandidates(allSpots, carPlate, carType, entryCoords, excludedSpotNames);
+    const chosenSpot = candidates[0]?.spot || null;
+
+    if (chosenSpot?.Name) {
+      this.reserveSpot(chosenSpot.Name, carPlate);
+    }
+
+    return chosenSpot;
+  }
+
+  public async getSpotCandidates(
+    carPlate: string,
+    carType: string,
+    entryCoords: { x: number; y: number } = { x: 300, y: 900 },
+    excludedSpotNames: Set<string> = new Set()
+  ): Promise<SpotCandidate[]> {
+    this.cleanExpiredReservations();
+
+    const allSpots = await simulatorClient.listParkingSpots();
+    return this.buildSpotCandidates(allSpots, carPlate, carType, entryCoords, excludedSpotNames);
+  }
+
+  private buildSpotCandidates(
+    allSpots: SimulatorParkingSpotDto[],
+    carPlate: string,
+    carType: string,
+    entryCoords: { x: number; y: number },
+    excludedSpotNames: Set<string>
+  ): SpotCandidate[] {
     // Collect all spot names currently reserved for other cars in transit
     const reservedSpotNames = new Set<string>();
     for (const [spotName, entry] of this.pendingReservations.entries()) {
@@ -41,14 +96,21 @@ export class AllocationService {
     const availableSpots = allSpots.filter((s: any) => {
       const name = s.name || s.Name;
       if (!name) return false;
+      if (excludedSpotNames.has(name)) return false;
       const lowerName = name.toLowerCase();
-      const purpose = (s.purpose || s.Purpose || '').toLowerCase();
+      const purpose = (s.purpose || s.Purpose || s.SpotType || '').toLowerCase();
 
       if (purpose.includes('entry') || purpose.includes('exit') || purpose.includes('leave')) return false;
       if (lowerName.includes('entry') || lowerName.includes('exit') || lowerName.includes('escape')) return false;
 
       // Exclude physically occupied spots in simulator
-      const isOccupied = s.detectedCars !== undefined ? s.detectedCars > 0 : (s.OccupancyStatus === 'Occupied' || s.OccupancyStatus === 'Reserved');
+      const detectedCars = Number(s.detectedCars ?? s.DetectedCars ?? s.CarCount ?? 0);
+      const occupancyStatus = (s.OccupancyStatus || s.occupancyStatus || '').toLowerCase();
+      const isOccupied =
+        detectedCars > 0 ||
+        occupancyStatus === 'occupied' ||
+        occupancyStatus === 'reserved' ||
+        Boolean(s.lastCarPlate);
       if (isOccupied) return false;
 
       // Exclude in-flight reserved spots
@@ -62,14 +124,14 @@ export class AllocationService {
     });
 
     if (availableSpots.length === 0) {
-      return null;
+      return [];
     }
 
     // 2. Score and calculate distance for each candidate spot
     const normCarType = (carType || 'Normal').toLowerCase();
 
     const candidates: SpotCandidate[] = availableSpots.map((spot: any) => {
-      const rawSpotType = spot.parkingForCarType || spot.SpotType || spot.spotType || 'Any';
+      const rawSpotType = spot.parkingForCarType || spot.CarType || spot.SpotType || spot.spotType || 'Any';
       const spotType = rawSpotType.toLowerCase();
       let score = 0;
 
@@ -95,7 +157,7 @@ export class AllocationService {
       const normalizedSpot: SimulatorParkingSpotDto = {
         ...spot,
         Name: spot.name || spot.Name,
-        SpotType: spot.parkingForCarType || spot.SpotType || 'Any',
+        SpotType: spot.parkingForCarType || spot.CarType || spot.SpotType || 'Any',
       };
 
       return { spot: normalizedSpot, score, distance };
@@ -109,23 +171,20 @@ export class AllocationService {
       return a.distance - b.distance;
     });
 
-    const chosenSpot = candidates[0].spot;
-
-    // Record in-flight reservation
-    if (chosenSpot && chosenSpot.Name) {
-      this.pendingReservations.set(chosenSpot.Name, {
-        carPlate,
-        spotName: chosenSpot.Name,
-        reservedAt: Date.now(),
-      });
-    }
-
-    return chosenSpot;
+    return candidates;
   }
 
   public releaseReservation(spotName: string): void {
     if (spotName) {
       this.pendingReservations.delete(spotName);
+    }
+  }
+
+  public releaseReservationForCar(carPlate: string): void {
+    for (const [spotName, entry] of this.pendingReservations.entries()) {
+      if (entry.carPlate === carPlate) {
+        this.pendingReservations.delete(spotName);
+      }
     }
   }
 
@@ -140,6 +199,15 @@ export class AllocationService {
         this.pendingReservations.delete(spotName);
       }
     }
+  }
+
+  private reserveSpot(spotName: string, carPlate: string): void {
+    this.releaseReservationForCar(carPlate);
+    this.pendingReservations.set(spotName, {
+      carPlate,
+      spotName,
+      reservedAt: Date.now(),
+    });
   }
 }
 
